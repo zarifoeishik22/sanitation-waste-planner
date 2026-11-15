@@ -1,0 +1,285 @@
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+SFD Lite Report
+Kaliakair Municipality
+Bangladesh
+This SFD Lite Report was prepared by
+CWIS-FSM Support Cell, DPHE
+Date of production: 06/03/2023
+Last update: 02/08/2023
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+3 General city information
+Geography: Kaliakair Municipality is situated within the Kaliakair Sub-District (Upazila) in Gazipur District
+(Zila), which is under Dhaka Division. The geographical coordinates of Kaliakair are 24° 4' 10.03'' N and
+1
+90° 13' 19.64'' E . It is bordered on the north by the Upazilas of Mirzapur and Sakhipur, on the south by
+the Upazilas of Savar and Dhamrai, on the east by the Upazilas of Gazipur Sadar and Sreepur, and on
+2
+the west by the Upazila of Mirzapur (Figure 2).
+Kaliakair is a fast-growing municipality located in Gazipur District and 70 km far from North of Dhaka. It
+is about 15 km from the District Headquarter in Gazipur and it is well connected with road and railways.
+Kaliakair Municipality was established on 9 April 2001 as C class municipality and it became B class
+municipality in 14 September 2006 now it has upgraded as an “A” class municipality. Kaliakair is the
+second smallest Upazila of Gazipur district in terms of population (Figure 2).
+Figure 2: Kaliakair Municipality Location Map.
+1
+https://www.latlong.net/place/kaliakair-bangladesh-19737.html
+2
+https://en.banglapedia.org/index.php/Kaliakair_Upazila
+2
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+Categorisation: The Local Government (Paurashava) Act of 2009 classifies Municipality of Bangladesh
+into A, B, and C classes based on their annual income . Kaliakair Municipality was established on 9 April
+2001 as C class municipality and it became B class municipality in 14 September 2006. Now it has
+upgraded as an “A” class municipality. Kaliakair is the second smallest Upazila of Gazipur district in
+3
+terms of population (Figure 3).
+Figure 3: Kaliakair Municipality Ward Boundary Map.
+Demography: According to the population census in 2011 by the Bangladesh Bureau of Statistics (BBS),
+the Kaliakair city population was 157,162. The population growth in the Municipality is 4.02% per year.
+Considering 10% floating population, such as farmers and traders comes to the city every day, the
+present (2023) population is estimated to be around 277,423 (Table 1). The household survey results
+show that majority of the occupation is business (42%), followed by private service (28%) and agriculture
+4
+(4%) .
+3
+Kaliakair Paurashava Master Plan 2011-2031.
+4
+KII and field visit during Baseline survey 2023 .
+3
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+Table 1: City profile (Source: KII at Kaliakair Municipality and Kaliakair Paurashava Master Plan 2011-
+2031).
+Population parameters Value
+Estimated population, 2023 277,423
+Households, 2023 68,163
+Area, sq.km 27.27
+Total roads, km 199.89
+Total drains, km 11.5
+Climate: Kaliakair, which is located at 8 m (26 ft) above sea level, has a tropical savanna climate
+5
+(Köppen climate classification: Aw) . The maximum mean temperature observed is around 32.4°C- 36°C
+between March-August, with the minimum mean temperatures observed are between 15-17°C in
+January- February. The annual average rainfall is about 2,100 mm, according to BMD (2003-2019).
+Hydrology: The Bangshi River passes by north side and crosses through the municipality area. Main
+notable rivers are Turag, Bangshi, Salda, Boalia, Hawla, Ujan and Markaj Beels and Goala and Betjhuri
+6
+canals . Every year, many areas within the municipality face water logging during monsoon for drainage
+7
+congestion .
+Housing: The household survey included the different types of residential structures in the municipality
+which are pucca, semi-pucca, tin-shed and kacha/jhupri houses.
+• Pucca: (houses single or multi-storied built with substantial materials such as brick, cement, and
+concrete),
+• Semi pucca: houses (either the roof or the walls, but not both, are not made of pucca materials),
+• Tin-shed: (roof of the house made of corrugated iron sheets),
+• Kacha/Jhupri: roof and walls made of temporary materials like bamboo, paper boards,
+8
+polyethylene sheets, and the floor made of mud etc .
+5
+https://en.db-city.com/Bangladesh--Dhaka--Gazipur--Kaliakair.
+6
+Kaliakair Paurashava Master Plan 2011-2031.
+7
+Kaliakair Paurashava Master Plan 2011-2031.
+8
+KII and field visit during Baseline survey 2023 .
+4
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+4 Service outcomes
+The city does not have a dedicated sewerage system and most sanitation systems available are
+classified as onsite systems (86.1%). The main types of toilet facilities are septic tanks connected to a
+soak pit, to an open drain, to a water body or to open ground, lined tanks or lined pits, with no outlet or
+overflow and unlined pits.
+Table 2 summarizes the sanitation systems in use, as well as estimates of the population connected to
+each system. For the onsite sanitation systems, it shows the proportions of each from which faecal
+sludge is then emptied, transported to treatment and treated. For the offsite systems (toilet discharging
+to open drain), it shows the proportion of wastewater delivered to treatment and treated.
+Table 2: SFD Matrix for Kaliakair Municipality.
+The figures shown in Table 2 and elaborated in the following section are derived from information
+obtained through household (HH) survey, Key Informant Interviews (KII s ), and Focus Group Discussions
+(FGD s ) (as shown in Figure 4).
+Overview on technologies and methods used for different sanitation systems through the sanitation
+service chain is as follows:
+5
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+4.1 Offsite Systems
+The city does not have a dedicated sewerage system. However, during field observation and HH survey,
+it was found that there is a certain area where toilets are directly connected to open drains or storm
+sewer. Similarly, a portion of septic tanks is directly connected to open drains or storm sewer. Therefore,
+T1A1C6 system is considered as 9.6% of the total population of the city to generate the SFD graphic.
+Similarly, the T1A2C6 system is considered as 41.5% of the total population of the city to generate the
+SFD graphic. In the absence of a sewerage system, the faecal sludge and the supernatant in T1A2C6
+are directly discharged into open water body or the environment untreated.
+4.2 On-site Sanitation Systems
+Figure 4: Household survey and consultations. (Source: Field Survey, 2023/ O.CREEDS_WaterAid
+Bangladesh).
+Containment: Almost all the households (86.1%) in the city have their latrine which is connected to single
+pits, twin pits, septic tanks, or discharged directly into the environment (e.g., open-drain or storm sewer).
+From the household survey, it was found that 65.5% of the city population uses septic tanks as the
+containment system, 16.4% of the toilets have single pit systems, and 1.2% of people use double pits
+in the city, 3% of the people use dug hole as the containment system. About 13.9% do not have any
+type of containment and discharges directly to the environment (KII, FGDs, HH survey, 2023).
+According to the type of connectivity and features of containment technologies, the discharging points
+of the toilets are categorized as: 5.9% of the population uses septic tanks connected to soak pits
+(T1A2C5), 41.5% of the population uses septic tanks connected to open drain (T1A2C6), 7.2% of the
+population uses septic tanks connected to water bodies (T1A2C7), 11.1% of the population uses septic
+tanks connected to open ground (T1A2C8), 1.2% of the population uses lined tanks with impermeable
+walls and open bottom, no outlet or overflow (T1A4C10), 16.3% of the population relies on lined pits
+with semi-permeable walls and open bottom with no outlet or overflow (T1A5C10) and 3.0% of the
+6
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+population uses unlined pit, no outlet (T1A6C10) (KII, FGDs, HH survey, 2023). Thus, at the containment
+stage, the city’s excreta of only 26% of the population are contained. Figure 6 shows pictures of these
+technologies in operation.
+9
+Groundwater Pollution: The depth to groundwater in the city ranges from 3-10 metres . The most
+common drinking water production technology is a tube well with a hand pump or motorized pump.
+Among them, 93.1% of the households use their own tube well fitted with electric motor and 5.5% use
+their own hand pump tube well. There is no supply water system within the municipality. Lateral
+separation between sanitation facilities and water sources varies from one area to another. Tube wells
+of different sizes and depths are generally used to pump water from the subsurface confined aquifers.
+During the household visit and FGDs, it was found that less than 5% of sanitation facilities are located
+within 10 metres from the groundwater source. Besides, due to the geographical situation, sanitation
+facilities are not located uphill of the groundwater sources. According to a survey report on
+‘Hydrogeological screening, slug test and geophysical logging on observation well units’, conducted by
+the Department of Public Health Engineering (DPHE) on March 2017, drinking water is collected from
+the confined aquifer (25m – 200m) through pumps. Hence, considering all these factors, it is considered
+that there is not any significant risk of groundwater contamination in the city. Therefore, a low risk of
+groundwater contamination is considered in the city.
+20 met res
+50-200 met res
+Figure 5: Soil profile in Kaliakair Upazila and location of tube well screen.
+9
+Survey Report on ‘Hydrogeological screening, slug test and geophysical logging on observation well units’, conducted by the
+Department of Public Health Engineering (DPHE) .
+7
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+Figure 6: Containment technologies and their connections in Kaliakair Municipality. Left: Toilet outlet
+connected to open drain, Right: Toilet outlets direct connected to waterbodies. (Source: Field
+Survey 2023/ O.CREEDS_WaterAid Bangladesh).
+Emptying: 27% of households relying on septic tanks get service from private sweepers for emptying of
+the septic tank. It was observed from the survey that 30% of septic tanks have been constructed in the
+last 5 years. According to the survey from 2023, the frequency of emptying of septic tanks or covered
+pits varies from 1 to 8 years depending upon the size, uses, etc.
+However, about 25% of the septic tanks, connected to the soak pit are emptied within 2-5 years. About
+27% of the septic tanks connected to open drains, open ground or water bodies are emptied within 2-5
+years. Almost 79% of single pit latrines are emptied within 1-2 years. Besides the above information, it
+was also revealed during the discussion in FGDs and household visits that the demand for desludging
+septic tanks would increase shortly. Desludging of the septic tanks and pits is mostly (86%) done by
+private sweepers. In few households, desludging is done by municipal sweepers (9%) and family
+members (5%). Around 42% of this withdrawal is done manually using a bucket and rope. 35% use
+electric pumps and some use ( 23 %) manual pump– these reflect the use of the higher level of
+10
+technologies by some of the workers . The municipality has one vacutug available but not in operation .
+Transportation: The sludge withdrawn from the septic tanks and latrine pits by the cleaners is disposed
+of in various places. Based on the survey from 2023, it was observed that almost 16% of the respondents
+who use any kind of containment system informed that faecal sludge (sludge from the septic tank or
+covered pit latrines) is disposed of in open ground covered with soil away from the house. Besides, 84%
+of the faecal sludge is disposed of in the open environment like a drain, open ground, and water bodies.
+Treatment/Disposal: Presently, there are no treatment facilities in the town.
+4.3 Open Defecation
+From the HH survey, KIIs and FGDs, it was found that 100% of citizens use some kind of toilet in the
+municipality. Thus, from the sanitation point of view, the town is considered an open defecation-free
+town.
+10
+KII with Mayor and Conservancy Inspector.
+8
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+4.4 SFD Graphic
+The outcome of the SFD graphic shows that only eleven percent (11%) of the excreta flow is classified
+as safely managed, and the remaining eighty nine percent (89%) is classified as unsafely managed
+(Figure 7).
+Figure 7: SFD Graphic for Kaliakair Municipality Municipality.
+The unsafely managed excreta originate from wastewater and not delivered to treatment (14%), Faecal
+Sludge (FS) both contained and not contained - not delivered to treatment (26%), FS not contained -
+not emptied (36%) and 13% of supernatant not delivered to treatment.
+Thus, the safely managed excreta originate from FS contained - not emptied (11%). This 11 % resembles
+the FS stored in containment s without significant risk to groundwater pollution. Thus, the safely managed
+percentage of FS generated by this 11 % of the population is temporary until the FS from the
+containment s is emptied. Therefore, these systems will require emptying services in the short and
+medium term as they fill up.
+9
+
+Kaliakair Municipality Produced by:
+SFD Lite Report
+CWIS-FSM Support Cell, DPHE
+Bangladesh
+5 Data and assumptions
+The baseline survey conducted in February 2023 contains detailed data on different stages of the
+sanitation value chain. The SFD matrix is generated from these data, collected during sample household
+surveys, along with informal interviews, open-ended consultations, key informant interviews and focus
+group discussions with the municipality officials, educational institutions, health complex and general
+public. The SFD matrix was generated from these data. Finally, data from all these sources were
+triangulated to produce the SFD matrix, the SFD graphic and the SFD lite report.
+The last census was carried out about 12 years ago. So, the actual population, household, and sanitation
+data are not updated yet. Most of the households with septic tanks do not know the actual type, size,
+and design desludging periods. Also, a large number of pit users are unaware of the emptying events
+and frequency of their pit emptying. Due to all these data gaps, some assumptions have been made to
+produce the SFD graphic. These assumptions were shared with key informants at the municipality and
+accepted by them.
+Following assumptions were made for developing the SFD graphic for Kaliakair Municipality :
+✓ The proportion of FS in septic tanks, fully lined tanks, and lined, open bottom tanks are considered
+68%, 0%, and 100% respectively as per the guidance given in the Frequently Asked Questions
+(FAQs) in the Sustainable Sanitation Alliance (SuSanA) website.
+✓ According to the population census in 2011 by the Bangladesh Bureau of Statistics (BBS), the
+population of Kaliakair Municipality was 157,162. The urban population growth in Kaliakair is 4.02%
+per year. Considering 10% floating population, such as farmers and traders, comes to the city every
+day, the present (2023) population is estimated to be around 277,423 .
+✓ There are around 1.2% of twin pit latrines in the containment system. So, it is assumed that all these
+twin pit containment technologies are defined as a lined tank with impermeable walls and open
+bottom (system T1A4C10, 1.2%). Based on the household survey, variable F3 for system T1A4C10
+is set to 100%.
+✓ There are around 16.3% of single pit latrines in the containment systems. So, it is assumed that all
+these single pit containment technologies are defined as lined pits with semi-permeable walls and
+open bottom, no outlet or overflow, where there is no ‘significant risk’ of groundwater pollution
+(system T1A5C10, 16.3%). Most of the single pit latrines are found to be emptied within 1-2 years.
+Based on the household survey, variable F3 for system T1A5C10 is set to 79%.
+✓ 5.9% of septic tanks are connected to soak pits (system T1A2C5). T hey are well-constructed as per
+the field visit observation. The risk of groundwater contamination was deemed low, therefore that
+option was selected in the SFD Matrix.
+✓ Around 25% of HHs have emptied their septic tank with a soak pit with a desludging frequency of 2-
+5 years. Based on the household survey, variable F3 for system T1A2C5 is set to 25%.
+✓ There are about 59.8% of septic tanks connected to the open drain, water bodies and open ground.
+Based on the household survey, variable F3 for systems T1A2C6, T1A2C7 and T1A2C8 is set to
+27%.
+✓ Wastewater in T1A1C6 and supernatant in T1A2C6 are directly discharged into the river or the
+environment untreated. Therefore, variables W4c, W5c, S4e and S5e are set to 0%.
+✓ Since there are no wastewater or faecal sludge treatment facilities in the town and all the collected
+FS is disposed untreated into the environment, variables F4 and F5 for all systems are considered
+to be 0%.
+10

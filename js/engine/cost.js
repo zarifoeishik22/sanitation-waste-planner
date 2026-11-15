@@ -66,6 +66,25 @@ export function optionCost(option, itemsById, p) {
     }
   }
   const complete = missing.length === 0;
-  const status = statuses.has('TO FILL') ? 'TO FILL' : statuses.has('PLACEHOLDER') ? 'PLACEHOLDER' : statuses.size ? 'REAL' : 'TO FILL';
+  const status = statuses.has('TO FILL') ? 'TO FILL' : statuses.has('PLACEHOLDER') ? 'PLACEHOLDER' : statuses.has('USER') ? 'USER' : statuses.size ? 'REAL' : 'TO FILL';
   return { complete, missing, status, byCase: complete ? byCase : null };
+}
+
+/** Cost items with the user's own figures laid over the defaults. An edited item is marked USER, never PLACEHOLDER or REAL. */
+export function applyCostOverrides(costs, overrides = {}) {
+  const FIELDS = ['cost_low', 'cost_high', 'lifespan_years', 'uses_per_year'];
+  const items = costs.items.map((it) => {
+    const o = overrides[it.id];
+    if (!o) return it;
+    const next = { ...it };
+    let touched = false;
+    for (const f of FIELDS) {
+      if (!(f in o)) continue;
+      const v = o[f];
+      if (v === null || (typeof v === 'number' && Number.isFinite(v) && v >= 0)) { next[f] = v; touched = true; }
+    }
+    if (touched) { next.status = 'USER'; if (num(next.cost_low) && num(next.cost_high) && next.cost_high < next.cost_low) [next.cost_low, next.cost_high] = [next.cost_high, next.cost_low]; }
+    return next;
+  });
+  return { ...costs, items };
 }

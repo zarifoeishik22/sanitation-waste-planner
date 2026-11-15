@@ -137,6 +137,7 @@ export function plan(town, sfdTown, rules, costs, paramsJson, settings = {}) {
   return {
     settings: { gw, params: p }, households: hh, outcome: out, options, ranked: ranked.map((o) => o.id), summary, chain,
     placeholder_in_use: usedStatuses.has('PLACEHOLDER') || paramsJson.params.some((r) => r.status === 'PLACEHOLDER'),
+    placeholder_costs_in_use: usedStatuses.has('PLACEHOLDER'), user_costs_in_use: usedStatuses.has('USER'),
     notes,
   };
 }

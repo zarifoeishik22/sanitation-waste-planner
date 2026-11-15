@@ -1,0 +1,1 @@
+pdf.js 6.5.438 (pdfjs-dist, legacy build for older browsers), Apache License 2.0, https://github.com/mozilla/pdf.js. Unmodified build files: pdf.min.mjs, pdf.worker.min.mjs. Loaded only when a report PDF is chosen.
