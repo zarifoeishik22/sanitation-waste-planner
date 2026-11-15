@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="description" content="Draft planning tool: reads a Bangladeshi municipality's excreta flow diagram and lists costed sanitation options. Runs in the browser.">
+<meta name="description" content="Draft planning tool: reads a Bangladeshi municipality's excreta and waste flow diagrams and turns them into an ordered plan. Runs in the browser.">
 <title>Sanitation and waste planner (draft)</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/site.css">
@@ -13,7 +13,7 @@
 <body>
 <header class="masthead">
   <p class="wordmark" data-i18n="app.title">Sanitation and waste planner</p>
-  <p class="tagline" data-i18n="app.tagline">From a town's excreta flow diagram to costed options. Bangladeshi municipalities.</p>
+  <p class="tagline" data-i18n="app.tagline">From a town's excreta and waste flow diagrams to a plan. Bangladeshi municipalities.</p>
 </header>
 <div class="layout">
   <aside class="rail" aria-label="Town and assumptions">
@@ -48,8 +48,15 @@
     </form>
     </details>
   </aside>
-  <main id="sheet" aria-live="polite"><p class="loading">Loading the 50 towns…</p></main>
+  <div class="main">
+    <div class="tabbar">
+      <nav id="tabs" class="tabs" role="tablist" aria-label="Sections" data-i18n-title="tabs.label"></nav>
+      <button type="button" id="pdf" class="btn btn-pdf" data-i18n="pdf.button" data-i18n-title="pdf.hint">Download PDF</button>
+    </div>
+    <main id="sheet" role="tabpanel"><p class="loading">Loading the 50 towns…</p></main>
+  </div>
 </div>
+<div id="printsheet" aria-hidden="true"></div>
 <footer class="foot" id="foot"></footer>
 <div id="tip" role="tooltip" hidden></div>
 <script type="module" src="js/ui/app.js"></script>

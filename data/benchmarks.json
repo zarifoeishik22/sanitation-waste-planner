@@ -1,0 +1,29 @@
+{
+ "data_version": "0.2",
+ "retrieved": "2026-11-15",
+ "note": "National and global context figures shown beside a town's result. None of them is a town-level figure. Each carries its source, year and scope.",
+ "items": [
+  { "id": "san_safe", "value": 0.37, "unit": "share", "year": 2024, "scope": "Bangladesh", "indicator": "SDG 6.2.1a",
+    "source": "UN-Water SDG 6 Data Portal, Bangladesh page (indicator custodians: WHO and UNICEF, JMP)", "url": "https://sdg6data.org/country-or-area/Bangladesh" },
+  { "id": "wastewater_safe", "value": 0.16, "unit": "share", "year": 2024, "scope": "Bangladesh", "indicator": "SDG 6.3.1 (domestic)",
+    "source": "UN-Water SDG 6 Data Portal, Bangladesh page", "url": "https://sdg6data.org/country-or-area/Bangladesh" },
+  { "id": "oda", "value": 224, "unit": "USD million", "year": 2024, "scope": "Bangladesh", "indicator": "SDG 6.a.1",
+    "source": "UN-Water SDG 6 Data Portal, Bangladesh page", "url": "https://sdg6data.org/country-or-area/Bangladesh" },
+  { "id": "glaas_finance", "value": null, "unit": null, "year": null, "scope": "Bangladesh", "indicator": "GLAAS: WASH expenditure by source",
+    "source": "UN-Water GLAAS country data; not yet entered: the figures were not retrievable as text on 15 Nov 2026", "url": "https://glaas.who.int/" },
+  { "id": "wash_death_rate", "value": 35.5, "unit": "deaths per 100,000 people, age-standardised (95% UI 18.1 to 70.6)", "year": 2019, "scope": "Bangladesh",
+    "indicator": "Deaths attributable to unsafe water, sanitation and hygiene",
+    "source": "Global Burden of Disease 2019, as tabulated in J Glob Health 2024;14:04162, Table S2", "url": "https://jogh.org/wp-content/uploads/2024/08/jogh-14-04162-s001.pdf" },
+  { "id": "bcr_sanitation", "value": 5.5, "unit": "return per 1 spent", "year": 2013, "scope": "Global", "indicator": "Benefit-cost ratio of reaching universal basic sanitation",
+    "source": "Hutton G. Global costs and benefits of reaching universal coverage of sanitation and drinking-water supply. J Water Health 2013;11(1):1-12", "url": "https://doi.org/10.2166/wh.2012.105" },
+  { "id": "faeces_g_cap_day", "value": 128, "unit": "g of fresh faeces per person per day (median of published studies)", "year": 2015, "scope": "Global", "indicator": "Faecal wet mass",
+    "source": "Rose C, Parker A, Jefferson B, Cartmell E. Crit Rev Environ Sci Technol 2015;45(17):1827-1879", "url": "https://doi.org/10.1080/10643389.2014.1000761" }
+ ],
+ "links": [
+  { "id": "dphe", "url": "http://sanboard.gov.bd/" },
+  { "id": "sdg6", "url": "https://sdg6data.org/country-or-area/Bangladesh" },
+  { "id": "jmp", "url": "https://washdata.org/" },
+  { "id": "sfd", "url": "https://sfd.susana.org/" },
+  { "id": "wfd", "url": "https://wfd-data.rwm.global/" }
+ ]
+}
