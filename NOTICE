@@ -1,0 +1,17 @@
+sanitation-waste-planner
+
+Third-party material in this repository
+
+  Hind Siliguri typeface (vendor/fonts/)
+    Copyright (c) 2015 Indian Type Foundry. SIL Open Font License 1.1 (vendor/fonts/OFL.txt).
+    Files from the @fontsource/hind-siliguri package, version 5.3.0.
+
+Methods and source material referred to, not redistributed here
+
+  Shit Flow Diagram (SFD) method and system codes: SFD Promotion Initiative / SuSanA.
+  The 50 SFDs summarised in data/sfd.json are SFD Lite, level 0.5, status Draft,
+  prepared by the CWIS-FSM Support Cell, DPHE.
+
+  Waste Flow Diagram (WFD): GIZ, University of Leeds, Eawag, Wasteaware. The WFD figures in
+  data/wfd.json are the outputs of the study's own tool files. WFD Data Portal reports are
+  copyright GIZ and are not included in this repository.

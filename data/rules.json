@@ -1,0 +1,579 @@
+{
+ "data_version": "0.2",
+ "source": "data/source/P7_Cost_and_Rules_Template_v0.2.xlsx",
+ "generated": "2026-11-15",
+ "licence": "CC BY 4.0",
+ "review_status": "DRAFT - expert review",
+ "systems": [
+  {
+   "code": "T1A1C6",
+   "label": "Toilet discharges directly to open drain or storm sewer",
+   "group": "direct",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  },
+  {
+   "code": "T1A1C7",
+   "label": "Toilet discharges directly to water body",
+   "group": "direct",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  },
+  {
+   "code": "T1A1C8",
+   "label": "Toilet discharges directly to open ground",
+   "group": "direct",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  },
+  {
+   "code": "T1A2C5",
+   "label": "Septic tank connected to soak pit",
+   "group": "septic",
+   "contained_gw_low": true,
+   "contained_gw_high": false,
+   "sludge_factor": true,
+   "note": null
+  },
+  {
+   "code": "T1A2C6",
+   "label": "Septic tank connected to open drain or storm sewer",
+   "group": "septic",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": true,
+   "note": null
+  },
+  {
+   "code": "T1A2C7",
+   "label": "Septic tank connected to open water body",
+   "group": "septic",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": true,
+   "note": null
+  },
+  {
+   "code": "T1A2C8",
+   "label": "Septic tank connected to open ground",
+   "group": "septic",
+   "contained_gw_low": false,
+   "contained_gw_high": false,
+   "sludge_factor": true,
+   "note": null
+  },
+  {
+   "code": "T1A3C10",
+   "label": "Fully lined tank (sealed), no outlet or overflow",
+   "group": "tank",
+   "contained_gw_low": true,
+   "contained_gw_high": true,
+   "sludge_factor": false,
+   "note": "Not present in the 50 towns. Result system of the high-groundwater option. A sealed tank fills and must be emptied."
+  },
+  {
+   "code": "T1A4C10",
+   "label": "Lined tank, impermeable walls, open bottom, no outlet",
+   "group": "tank",
+   "contained_gw_low": true,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  },
+  {
+   "code": "T1A5C10",
+   "label": "Lined pit, semi-permeable walls, open bottom, no outlet",
+   "group": "pit",
+   "contained_gw_low": true,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  },
+  {
+   "code": "T1A6C10",
+   "label": "Unlined pit, no outlet or overflow",
+   "group": "pit",
+   "contained_gw_low": true,
+   "contained_gw_high": false,
+   "sludge_factor": false,
+   "note": null
+  }
+ ],
+ "options": [
+  {
+   "id": "O01",
+   "system": "T1A1C6",
+   "name": "New septic tank with soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for tank and soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C03",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C07",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O02",
+   "system": "T1A1C7",
+   "name": "New septic tank with soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for tank and soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C03",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C07",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O03",
+   "system": "T1A1C8",
+   "name": "New septic tank with soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for tank and soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C03",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C07",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    },
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O04",
+   "system": "T1A1C8",
+   "name": "Convert dug hole to VIP latrine",
+   "stage": "containment",
+   "result_system": "T1A5C10",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Low density; no flooding; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C05",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O05",
+   "system": "T1A2C6",
+   "name": "Connect septic tank to soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O06",
+   "system": "T1A2C7",
+   "name": "Connect septic tank to soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O07",
+   "system": "T1A2C8",
+   "name": "Connect septic tank to soak pit",
+   "stage": "containment",
+   "result_system": "T1A2C5",
+   "requires": [
+    "gw_low"
+   ],
+   "applies_when": "Plot space for soak pit; water table below pit base.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C04",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O08",
+   "system": "T1A2C6",
+   "name": "Cluster DEWATS for outlets",
+   "stage": "treatment",
+   "result_system": null,
+   "requires": [],
+   "applies_when": "Dense area; land available for a shared unit.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C01",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O09",
+   "system": "T1A2C7",
+   "name": "Cluster DEWATS for outlets",
+   "stage": "treatment",
+   "result_system": null,
+   "requires": [],
+   "applies_when": "Dense area; land available for a shared unit.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C01",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O10",
+   "system": "T1A2C8",
+   "name": "Cluster DEWATS for outlets",
+   "stage": "treatment",
+   "result_system": null,
+   "requires": [],
+   "applies_when": "Dense area; land available for a shared unit.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C01",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O11",
+   "system": "T1A2C5",
+   "name": "Scheduled emptying",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Road access for emptying vehicle or manual emptier.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C09",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O12",
+   "system": "T1A4C10",
+   "name": "Scheduled emptying",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Road access for emptying vehicle or manual emptier.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C09",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O13",
+   "system": "T1A5C10",
+   "name": "Scheduled emptying",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Road access for emptying vehicle or manual emptier.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C09",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O14",
+   "system": "T1A6C10",
+   "name": "Scheduled emptying",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Road access for emptying vehicle or manual emptier.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C09",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O15",
+   "system": "T1A4C10",
+   "name": "Manual emptying safety kits",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Narrow lanes where vehicles cannot reach.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C08",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O16",
+   "system": "T1A5C10",
+   "name": "Manual emptying safety kits",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Narrow lanes where vehicles cannot reach.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C08",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O17",
+   "system": "T1A6C10",
+   "name": "Manual emptying safety kits",
+   "stage": "emptying",
+   "result_system": null,
+   "requires": [
+    "treatment"
+   ],
+   "applies_when": "Narrow lanes where vehicles cannot reach.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C08",
+     "qty": null,
+     "qty_status": "FILL (e.g. 1 / cluster size)"
+    }
+   ]
+  },
+  {
+   "id": "O18",
+   "system": "T1A4C10",
+   "name": "Replace with sealed, fully lined tank",
+   "stage": "containment",
+   "result_system": "T1A3C10",
+   "requires": [
+    "gw_high"
+   ],
+   "applies_when": "High groundwater or flood risk (the SFD assumes low). Raised where flood-prone. A sealed tank must be emptied, so it is safe only with treatment.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C24",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O19",
+   "system": "T1A5C10",
+   "name": "Replace with sealed, fully lined tank",
+   "stage": "containment",
+   "result_system": "T1A3C10",
+   "requires": [
+    "gw_high"
+   ],
+   "applies_when": "High groundwater or flood risk (the SFD assumes low). Raised where flood-prone. A sealed tank must be emptied, so it is safe only with treatment.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C24",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  },
+  {
+   "id": "O20",
+   "system": "T1A6C10",
+   "name": "Replace with sealed, fully lined tank",
+   "stage": "containment",
+   "result_system": "T1A3C10",
+   "requires": [
+    "gw_high"
+   ],
+   "applies_when": "High groundwater or flood risk (the SFD assumes low). Raised where flood-prone. A sealed tank must be emptied, so it is safe only with treatment.",
+   "review_status": "DRAFT - expert review",
+   "lines": [
+    {
+     "item": "C24",
+     "qty": 1,
+     "qty_status": "qty 1 per household assumed"
+    }
+   ]
+  }
+ ],
+ "chain_package": [
+  {
+   "component": "Scheduled emptying service",
+   "stage": "emptying",
+   "item": "C09",
+   "basis": "per_household",
+   "qty": 1,
+   "required": true,
+   "sizing_note": "Services per year come from Cost_BoQ (uses_per_year)."
+  },
+  {
+   "component": "Emptying vehicle",
+   "stage": "transport",
+   "item": "C30",
+   "basis": "town",
+   "qty": null,
+   "required": true,
+   "sizing_note": "Number of vehicles from households served, trips per day and haul distance. Sizing rule to be agreed."
+  },
+  {
+   "component": "Small vacuum tug for narrow lanes",
+   "stage": "transport",
+   "item": "C31",
+   "basis": "town",
+   "qty": null,
+   "required": false,
+   "sizing_note": null
+  },
+  {
+   "component": "Faecal sludge treatment plant",
+   "stage": "treatment",
+   "item": "C12",
+   "basis": "town",
+   "qty": null,
+   "required": true,
+   "sizing_note": "Capacity (m3/day) from sludge volume emptied per year. Sizing rule to be agreed."
+  },
+  {
+   "component": "Sludge drying beds",
+   "stage": "treatment",
+   "item": "C34",
+   "basis": "town",
+   "qty": null,
+   "required": false,
+   "sizing_note": "Area from sludge loading rate."
+  },
+  {
+   "component": "Land for treatment site",
+   "stage": "treatment",
+   "item": "C35",
+   "basis": "town",
+   "qty": null,
+   "required": true,
+   "sizing_note": null
+  },
+  {
+   "component": "Co-treatment of faecal sludge and wastewater",
+   "stage": "treatment",
+   "item": "C11",
+   "basis": "town",
+   "qty": null,
+   "required": false,
+   "sizing_note": "Alternative to a stand-alone plant."
+  }
+ ]
+}
