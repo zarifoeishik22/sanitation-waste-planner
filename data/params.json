@@ -1,0 +1,55 @@
+{
+ "data_version": "0.2",
+ "source": "data/source/P7_Cost_and_Rules_Template_v0.2.xlsx",
+ "generated": "2026-11-15",
+ "params": [
+  {
+   "name": "disc_rate",
+   "description": "Discount rate used to annualise one-off costs",
+   "unit": "fraction",
+   "value": 0.08,
+   "status": "PLACEHOLDER",
+   "note": "Placeholder. Set per DPHE or WaterAid appraisal guidance."
+  },
+  {
+   "name": "infl_rate",
+   "description": "Annual cost escalation to bring older BoQ prices to the base year",
+   "unit": "fraction",
+   "value": 0.06,
+   "status": "PLACEHOLDER",
+   "note": "Placeholder. Replace with construction cost index trend."
+  },
+  {
+   "name": "price_base_year",
+   "description": "Year all costs are expressed in",
+   "unit": "year",
+   "value": 2026,
+   "status": "REAL",
+   "note": "Chosen base year."
+  },
+  {
+   "name": "cost_case",
+   "description": "Which cost to use from each low-high range",
+   "unit": "low / mid / high",
+   "value": "mid",
+   "status": "REAL",
+   "note": "Switch to see the plan under low or high costs."
+  },
+  {
+   "name": "hh_size",
+   "description": "Average household size, used when a town has no stated household count",
+   "unit": "persons",
+   "value": 5,
+   "status": "DATA",
+   "note": "Median of 20,179 households in the 50-town survey (q2.7.1 + q2.7.2). The mean is distorted by entry errors up to 1,647."
+  },
+  {
+   "name": "hh_basis",
+   "description": "Which household count to use",
+   "unit": "stated / hh_size",
+   "value": "stated",
+   "status": "REAL",
+   "note": "stated = households stated in the SFD report where given, otherwise population / hh_size. hh_size = always population / hh_size. Kaliakair: 68,163 stated against 55,485 at hh_size 5."
+  }
+ ]
+}

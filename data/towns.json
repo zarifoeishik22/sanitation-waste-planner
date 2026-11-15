@@ -1,0 +1,1041 @@
+{
+ "data_version": "1.0",
+ "source": "SFD_WFD_50_Master_v1.0.xlsx",
+ "source_sha256": "926d85915461bb21a262bedb214568626f8acc3e8273f6794abfe64264b8afa4",
+ "generated": "2026-11-15",
+ "licence": "CC BY 4.0",
+ "note": "Town-level aggregates only. No household records, coordinates or personal identifiers.",
+ "towns": [
+  {
+   "id": 1,
+   "name": "Kaliakair",
+   "district": "Gazipur",
+   "population_sfd": 277423,
+   "population_wfd": 277423,
+   "households_stated": 68163,
+   "households_source": "Kaliakair SFD Lite report, Table 1",
+   "sfd": {
+    "date": "2023-03-06",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.21,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "Waste bag weights are 2-day totals; the WFD generation input was halved.",
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Bauphal",
+   "district": null,
+   "population_sfd": 14307,
+   "population_wfd": 14307,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-04-30",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.25,
+    "giz_file_saved": "2023-10-10"
+   },
+   "flags": []
+  },
+  {
+   "id": 3,
+   "name": "Galachipa",
+   "district": null,
+   "population_sfd": 25721,
+   "population_wfd": 25721,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-02",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.22,
+    "giz_file_saved": "2023-12-11"
+   },
+   "flags": []
+  },
+  {
+   "id": 4,
+   "name": "Paikgachha",
+   "district": null,
+   "population_sfd": 19551,
+   "population_wfd": 19551,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-04",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-08-14"
+   },
+   "flags": []
+  },
+  {
+   "id": 5,
+   "name": "Betagi",
+   "district": null,
+   "population_sfd": 12930,
+   "population_wfd": 12930,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-02",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.22,
+    "giz_file_saved": "2023-08-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 6,
+   "name": "Singair",
+   "district": null,
+   "population_sfd": 35109,
+   "population_wfd": 35109,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-04",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.25,
+    "giz_file_saved": "2023-08-17"
+   },
+   "flags": []
+  },
+  {
+   "id": 7,
+   "name": "Sonargaon",
+   "district": null,
+   "population_sfd": 54072,
+   "population_wfd": 54072,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-10",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.27,
+    "giz_file_saved": "2023-08-20"
+   },
+   "flags": []
+  },
+  {
+   "id": 8,
+   "name": "Araihazar",
+   "district": "Narayanganj",
+   "population_sfd": 28997,
+   "population_wfd": 28997,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-10",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.25,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Sreepur",
+   "district": null,
+   "population_sfd": 217265,
+   "population_wfd": 217265,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-10",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.22,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Kalihati",
+   "district": "Tangail",
+   "population_sfd": 51669,
+   "population_wfd": 51669,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-03",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.21,
+    "giz_file_saved": "2023-12-11"
+   },
+   "flags": []
+  },
+  {
+   "id": 11,
+   "name": "Laksham",
+   "district": null,
+   "population_sfd": 106964,
+   "population_wfd": 106964,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.29,
+    "giz_file_saved": "2023-08-17"
+   },
+   "flags": []
+  },
+  {
+   "id": 12,
+   "name": "Nangalkot",
+   "district": "Cumilla",
+   "population_sfd": 41904,
+   "population_wfd": 41904,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-14",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.22,
+    "giz_file_saved": "2023-08-16"
+   },
+   "flags": []
+  },
+  {
+   "id": 13,
+   "name": "Sonaimuri",
+   "district": null,
+   "population_sfd": 49449,
+   "population_wfd": 49449,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-14",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.25,
+    "giz_file_saved": "2023-06-22"
+   },
+   "flags": []
+  },
+  {
+   "id": 14,
+   "name": "Chauddagram",
+   "district": null,
+   "population_sfd": 56685,
+   "population_wfd": 56685,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-14",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.279,
+    "giz_file_saved": "2023-11-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 15,
+   "name": "Hajiganj",
+   "district": "Chandpur",
+   "population_sfd": 82064,
+   "population_wfd": 82064,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-03-16",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-08-20"
+   },
+   "flags": [
+    "SFD date precedes the household survey: probable typo in the source, not altered."
+   ]
+  },
+  {
+   "id": 16,
+   "name": "Daudkandi",
+   "district": null,
+   "population_sfd": 69236,
+   "population_wfd": 69236,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.25,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 17,
+   "name": "Debidwar",
+   "district": null,
+   "population_sfd": 78886,
+   "population_wfd": 78886,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.21,
+    "giz_file_saved": "2023-11-09"
+   },
+   "flags": [
+    "SFD date precedes the household survey: probable typo in the source, not altered."
+   ]
+  },
+  {
+   "id": 18,
+   "name": "Kalkini",
+   "district": null,
+   "population_sfd": 50182,
+   "population_wfd": 50182,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-08-20"
+   },
+   "flags": []
+  },
+  {
+   "id": 19,
+   "name": "Banaripara",
+   "district": null,
+   "population_sfd": 12662,
+   "population_wfd": 12662,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 20,
+   "name": "Ishwardi",
+   "district": "Pabna",
+   "population_sfd": 86829,
+   "population_wfd": 86829,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.253,
+    "giz_file_saved": "2023-08-20"
+   },
+   "flags": []
+  },
+  {
+   "id": 21,
+   "name": "Shahjadpur",
+   "district": "Sirajganj",
+   "population_sfd": 85847,
+   "population_wfd": 85847,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.26,
+    "giz_file_saved": "2023-07-13"
+   },
+   "flags": []
+  },
+  {
+   "id": 22,
+   "name": "Goalanda",
+   "district": "Rajbari",
+   "population_sfd": 28595,
+   "population_wfd": 28595,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-05-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.22,
+    "giz_file_saved": "2023-08-20"
+   },
+   "flags": []
+  },
+  {
+   "id": 23,
+   "name": "Beanibazar",
+   "district": "Sylhet",
+   "population_sfd": 54112,
+   "population_wfd": 54112,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-22",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.27,
+    "giz_file_saved": "2023-11-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 24,
+   "name": "Nagarkanda",
+   "district": "Faridpur",
+   "population_sfd": 17257,
+   "population_wfd": 17257,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.26,
+    "giz_file_saved": "2024-08-27"
+   },
+   "flags": []
+  },
+  {
+   "id": 25,
+   "name": "Arani",
+   "district": null,
+   "population_sfd": 21007,
+   "population_wfd": 21007,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 26,
+   "name": "Gopalpur (Lalpur)",
+   "district": "Natore",
+   "population_sfd": 26708,
+   "population_wfd": 26708,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-07-16"
+   },
+   "flags": []
+  },
+  {
+   "id": 27,
+   "name": "Muksudpur",
+   "district": null,
+   "population_sfd": 24057,
+   "population_wfd": 28762,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2025-07-28"
+   },
+   "flags": [
+    "SFD and WFD use different populations (24,057 and 28,762).",
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 28,
+   "name": "Shibchar",
+   "district": "Madaripur",
+   "population_sfd": 33776,
+   "population_wfd": 33776,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-07-16"
+   },
+   "flags": []
+  },
+  {
+   "id": 29,
+   "name": "Charghat",
+   "district": null,
+   "population_sfd": 46165,
+   "population_wfd": 46165,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.278,
+    "giz_file_saved": "2023-11-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 30,
+   "name": "Sreemangal",
+   "district": null,
+   "population_sfd": 31679,
+   "population_wfd": 31679,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-07-10"
+   },
+   "flags": []
+  },
+  {
+   "id": 31,
+   "name": "Kamalganj",
+   "district": "Moulvibazar",
+   "population_sfd": 21550,
+   "population_wfd": 21550,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-22",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.278,
+    "giz_file_saved": "2023-12-11"
+   },
+   "flags": []
+  },
+  {
+   "id": 32,
+   "name": "Bera",
+   "district": "Pabna",
+   "population_sfd": 66631,
+   "population_wfd": 66631,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-06-17",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.19,
+    "giz_file_saved": "2023-11-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 33,
+   "name": "Chhatak",
+   "district": "Sunamganj",
+   "population_sfd": 64791,
+   "population_wfd": 64791,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.21,
+    "giz_file_saved": "2023-11-07"
+   },
+   "flags": []
+  },
+  {
+   "id": 34,
+   "name": "Nabiganj",
+   "district": "Habiganj",
+   "population_sfd": 31625,
+   "population_wfd": 31625,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.28,
+    "giz_file_saved": "2023-08-24"
+   },
+   "flags": []
+  },
+  {
+   "id": 35,
+   "name": "Raipura",
+   "district": "Narsingdi",
+   "population_sfd": 45905,
+   "population_wfd": 45905,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-08-24"
+   },
+   "flags": []
+  },
+  {
+   "id": 36,
+   "name": "Manohardi",
+   "district": "Narsingdi",
+   "population_sfd": 22304,
+   "population_wfd": 22304,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2024-08-21"
+   },
+   "flags": []
+  },
+  {
+   "id": 37,
+   "name": "Islampur",
+   "district": "Jamalpur",
+   "population_sfd": 51327,
+   "population_wfd": 51327,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-12-11"
+   },
+   "flags": []
+  },
+  {
+   "id": 38,
+   "name": "Karimganj",
+   "district": "Kishoreganj",
+   "population_sfd": 35305,
+   "population_wfd": 35305,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 39,
+   "name": "Dewanganj",
+   "district": "Jamalpur",
+   "population_sfd": 50012,
+   "population_wfd": 50012,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-11-14"
+   },
+   "flags": []
+  },
+  {
+   "id": 40,
+   "name": "Gafargaon",
+   "district": "Mymensingh",
+   "population_sfd": 45671,
+   "population_wfd": 45671,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-11",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2023-11-15"
+   },
+   "flags": []
+  },
+  {
+   "id": 41,
+   "name": "Muktagacha",
+   "district": "Mymensingh",
+   "population_sfd": 76744,
+   "population_wfd": 76744,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-12",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2023-07-23"
+   },
+   "flags": []
+  },
+  {
+   "id": 42,
+   "name": "Patgram",
+   "district": "Lalmonirhat",
+   "population_sfd": 45006,
+   "population_wfd": 45006,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-12",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 43,
+   "name": "Hakimpur",
+   "district": "Dinajpur",
+   "population_sfd": 38259,
+   "population_wfd": 38259,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-12",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.23,
+    "giz_file_saved": "2023-07-25"
+   },
+   "flags": []
+  },
+  {
+   "id": 44,
+   "name": "Nageshwari",
+   "district": "Kurigram",
+   "population_sfd": 94330,
+   "population_wfd": 94330,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-13",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-07-25"
+   },
+   "flags": []
+  },
+  {
+   "id": 45,
+   "name": "Sundarganj",
+   "district": "Gaibandha",
+   "population_sfd": 22208,
+   "population_wfd": 22208,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-13",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.17,
+    "giz_file_saved": "2025-03-02"
+   },
+   "flags": [
+    "WFD inputs fail mass balance (disposal plus informal recovery exceed generation); negative outputs set to 0.",
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 46,
+   "name": "Rangunia",
+   "district": "Chattogram",
+   "population_sfd": 41925,
+   "population_wfd": 41925,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-16",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.21,
+    "giz_file_saved": "2023-07-27"
+   },
+   "flags": []
+  },
+  {
+   "id": 47,
+   "name": "Banshkhali",
+   "district": "Chattogram",
+   "population_sfd": 46849,
+   "population_wfd": 46849,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-16",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.27,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 48,
+   "name": "Satkania",
+   "district": "Chattogram",
+   "population_sfd": 54858,
+   "population_wfd": 54858,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.26,
+    "giz_file_saved": "2023-07-27"
+   },
+   "flags": []
+  },
+  {
+   "id": 49,
+   "name": "Chakaria",
+   "district": "Cox's Bazar",
+   "population_sfd": 99018,
+   "population_wfd": 99018,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.26,
+    "giz_file_saved": "2025-11-18"
+   },
+   "flags": [
+    "The GIZ WFD file was re-saved in 2025; whether inputs changed is not established."
+   ]
+  },
+  {
+   "id": 50,
+   "name": "Kalaroa",
+   "district": "Satkhira",
+   "population_sfd": 30777,
+   "population_wfd": 30777,
+   "households_stated": null,
+   "households_source": null,
+   "sfd": {
+    "date": "2023-07-18",
+    "level": "0.5",
+    "status": "Draft",
+    "prepared_by": "CWIS-FSM Support Cell, DPHE"
+   },
+   "wfd": {
+    "generation_kg_cap_day": 0.24,
+    "giz_file_saved": "2023-12-11"
+   },
+   "flags": []
+  }
+ ]
+}

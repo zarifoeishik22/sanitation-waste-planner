@@ -1,0 +1,11 @@
+# never commit source data with household records, or copyrighted reports
+*.pdf
+!tests/fixtures/sfd/*.pdf
+tests/fixtures-local/
+SFD_WFD_50_Master*.xlsx
+SWM_Scoping*.xlsx
+*.csv
+__pycache__/
+node_modules/
+.DS_Store
+~$*

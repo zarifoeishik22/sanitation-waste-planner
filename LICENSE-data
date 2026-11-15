@@ -1,0 +1,22 @@
+Rules, costs and data files: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+Applies to everything under data/ (the JSON files and the workbook in data/source/),
+unless a file or a row says otherwise.
+
+You may share and adapt this material for any purpose, provided you give appropriate
+credit, link to the licence and indicate if changes were made.
+
+Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode
+Summary:         https://creativecommons.org/licenses/by/4.0/
+
+How to credit
+  Town data:  "50-municipality SFD and WFD study, Bangladesh (2023), town-level aggregates,
+              via sanitation-waste-planner".
+  Cost rows:  rows whose status is REAL carry their own source reference; rows that come from
+              WaterAid Bangladesh bills of quantities are credited to WaterAid Bangladesh.
+              (v0.1 contains no REAL rows.)
+
+Not covered by this licence
+  Rows whose status is PLACEHOLDER are test values with no source. They are published so the
+  calculation can be checked, and must not be quoted or reused as cost estimates.
+  Third-party material listed in NOTICE keeps its own terms.
