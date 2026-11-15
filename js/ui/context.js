@@ -13,7 +13,19 @@ export function defaultState(d) {
   const base = paramMap(d.params);
   const first = d.towns.towns.find((x) => x.name === DEFAULT_TOWN) || d.towns.towns[0];
   return { townId: String(first.id), tab: 'overview', gw: 'low', case: base.cost_case, basis: base.hh_basis, hh: base.hh_size, disc: +(base.disc_rate * 100).toFixed(2),
-    uptake: 0, treat: 0, target: '', wcol: null, wctl: 0, costOverrides: {}, costMsg: '', own: null, ownForm: {}, ownMsgs: [] };
+    uptake: 0, treat: 0, target: '', wcol: null, wctl: 0, costOverrides: {}, costMsg: '', own: null, ownForm: {}, ownMsgs: [], upSnap: {} };
+}
+
+/** Where a typed town's figures came from: 'uploaded' (untouched since the PDF was read), 'edited' (read, then changed) or 'typed'. */
+export function reportBasis(form, snap, hasWfd) {
+  const one = (kind) => {
+    const s = snap && snap[kind];
+    if (!s || !Object.keys(s).length) return 'typed';
+    const same = Object.keys(s).every((k) => String(form[k] ?? '') === s[k]);
+    const extra = kind === 'sfd' && Object.keys(form).some((k) => /^(share|emptied)_/.test(k) && Number(form[k]) > 0 && !(k in s));
+    return same && !extra ? 'uploaded' : 'edited';
+  };
+  return { sfd: one('sfd'), wfd: hasWfd ? one('wfd') : 'none' };
 }
 
 function ownPeer(name, sfdTown, sysIdx) {

@@ -1,7 +1,7 @@
 // Page wiring: load data, keep the page state, run the engine, put the active tab on the page.
 import { paramMap } from '../engine/cost.js';
 import { makeT, renderFacts, esc } from './render.js';
-import { buildContext, buildOwn, defaultState } from './context.js';
+import { buildContext, buildOwn, defaultState, reportBasis } from './context.js';
 import { TABS, WFD_FIELDS, renderTab, renderPrint, whatIfSanOut, waysOut, whatIfWasteOut, costTag, ownTotal, banners } from './views.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -134,12 +134,22 @@ function start(d) {
       data_versions: { rules: d.rules.data_version, costs: d.costs.data_version, towns: d.sfd.data_version, benchmarks: d.benchmarks.data_version },
       town: ctx.town.name, settings: { gw: state.gw, case: state.case, basis: state.basis, hh: ctx.hh, disc: +(ctx.disc * 100).toFixed(2) },
       what_if: { uptake: state.uptake, treat: state.treat, target: state.target, collection: state.wcol, controlled: state.wctl },
-      cost_overrides: state.costOverrides, own_form: state.own ? state.ownForm : null };
+      cost_overrides: state.costOverrides, own_form: state.own ? state.ownForm : null, up_snap: state.own ? state.upSnap : null };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(run, null, 1)], { type: 'application/json' }));
     a.download = `planner-run-${ctx.town.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${today}.json`;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  /** A saved snapshot of what the PDFs filled in, kept only if it has the expected shape. */
+  function cleanSnap(x) {
+    const out = {};
+    for (const kind of ['sfd', 'wfd']) {
+      const o = x && typeof x === 'object' ? x[kind] : null;
+      if (o && typeof o === 'object') out[kind] = Object.fromEntries(Object.entries(o).filter(([k, v]) => /^[a-z_0-9A-Z]{1,40}$/.test(k) && typeof v === 'string').map(([k, v]) => [k, v.slice(0, 60)]));
+    }
+    return out;
   }
 
   async function loadRun(file) {
@@ -157,6 +167,7 @@ function start(d) {
       state.costOverrides = clean;
       if (run.own_form && typeof run.own_form === 'object') {
         state.ownForm = Object.fromEntries(Object.entries(run.own_form).filter(([k, v]) => /^[a-z_0-9A-Z]{1,40}$/.test(k) && ['string', 'number'].includes(typeof v)).map(([k, v]) => [k, String(v).slice(0, 60)]));
+        state.upSnap = cleanSnap(run.up_snap);
       }
       state.costMsg = t('costs.loaded', { n: Object.keys(clean).length });
     } catch (err) {
@@ -188,6 +199,7 @@ function start(d) {
       const p = parseSfdReport(pages);
       if (!p.is_sfd_report || !p.systems.length) return say([{ kind: 'err', key: 'up.not_sfd' }]);
       for (const k of Object.keys(f)) if (k.startsWith('share_') || k.startsWith('emptied_')) delete f[k];
+      state.upSnap.sfd = null;
       if (p.town) f.name = p.town;
       if (p.population) f.population = String(p.population);
       f.households = p.households ? String(p.households) : '';
@@ -198,6 +210,7 @@ function start(d) {
         if (s.emptied !== null) f[`emptied_${s.code}`] = r2(s.emptied * 100);
         else if (ctx.sysIdx[s.code] && ctx.sysIdx[s.code].group !== 'direct') blank.push(s.code);
       }
+      state.upSnap.sfd = Object.fromEntries(Object.entries(f).filter(([k]) => /^(share_|emptied_)/.test(k) || ['population', 'households', 'sludge_pct'].includes(k)));
       msgs.push({ kind: 'ok', key: 'up.sfd_read', vars: { town: p.town || '?', n: p.systems.length, population: p.population ? p.population.toLocaleString('en-GB') : '?' } });
       if (p.share_sum < 0.99 || p.share_sum > 1.01) msgs.push({ kind: 'warn', key: 'up.sfd_short', vars: { sum: `${r2(p.share_sum * 100)}%`, gap: `${r2(Math.abs(1 - p.share_sum) * 100)}%` } });
       if (p.conflicts.length) msgs.push({ kind: 'warn', key: 'up.sfd_conflict', vars: { codes: p.conflicts.map((c) => c.code).join(', ') } });
@@ -216,6 +229,7 @@ function start(d) {
       if (!f.name && p.town) f.name = p.town;
       if (!f.population && p.population) f.population = String(p.population);
       const version = p.model_version ? t('up.wfd_version', { v: p.model_version, model: p.burning_model || '?' }) : '';
+      state.upSnap.wfd = Object.fromEntries(WFD_FIELDS.map((k) => [k, f[k]]));
       msgs.push({ kind: 'ok', key: 'up.wfd_read', vars: { town: p.town || '?', tonnes: p.plastic_unmanaged_t.toLocaleString('en-GB'), version } });
       if (p.checks.stage_ok === true) msgs.push({ kind: 'ok', key: 'up.wfd_check_ok', vars: { sum: p.checks.stage_sum.toLocaleString('en-GB') } });
       if (p.checks.stage_ok === false) msgs.push({ kind: 'warn', key: 'up.wfd_check_bad', vars: { sum: p.checks.stage_sum, total: p.plastic_unmanaged_t } });
@@ -227,6 +241,7 @@ function start(d) {
   function useOwn() {
     const res = buildOwn(state.ownForm, ctx.sysIdx);
     if (!res.own) { state.ownMsgs = res.errors.map((e) => ({ kind: 'err', ...e })); draw(); $('#own-msgs').scrollIntoView({ block: 'center' }); return; }
+    res.own.town.basis = reportBasis(state.ownForm, state.upSnap, Boolean(res.own.wfdTown));
     state.own = res.own; state.ownMsgs = res.warnings.map((e) => ({ kind: 'warn', ...e }));
     state.townId = 'own'; state.wcol = null; state.tab = 'overview';
     fillSelect(); draw(); $('.tabbar').scrollIntoView({ block: 'start' });
@@ -264,7 +279,7 @@ function start(d) {
     else if (el.dataset.act === 'save-run') saveRun();
     else if (el.dataset.act === 'reset-costs') { state.costOverrides = {}; state.costMsg = t('costs.reset_done'); draw(); }
     else if (el.dataset.act === 'use-own') useOwn();
-    else if (el.dataset.act === 'clear-own') { state.ownForm = {}; state.ownMsgs = []; draw(); }
+    else if (el.dataset.act === 'clear-own') { state.ownForm = {}; state.upSnap = {}; state.ownMsgs = []; draw(); }
   });
 
   $('#foot').innerHTML = `<p>${esc(t('foot.privacy'))}</p><p>${esc(t('foot.versions', { rules: d.rules.data_version, data: d.sfd.data_version, source: d.sfd.source }))}</p><p>${esc(t('foot.licence'))}</p>`;

@@ -387,6 +387,14 @@ function sources(ctx) {
 
 /* ---------- print sheet ---------- */
 
+/** First footer line of the one-page PDF: which reports the figures rest on. */
+export function basisLine(town, t) {
+  if (!town.typed) return `${t('print.basis_pub')} ${t('print.source', { date: town.sfd.date, by: town.sfd.prepared_by })}`;
+  const b = town.basis || { sfd: 'typed', wfd: 'none' };
+  if (b.sfd === 'uploaded' && b.wfd === 'uploaded') return t('print.basis_up');
+  return t('print.basis_mixed', { sfd: t(`print.b.${b.sfd}`), wfd: t(`print.b.${b.wfd}`) });
+}
+
 export function renderPrint(ctx) {
   const { t, town, r, wv, state } = ctx;
   const c = r.outcome.components;
@@ -407,7 +415,7 @@ export function renderPrint(ctx) {
     ${wasteLine}
     <h2>${esc(t('print.plan'))}</h2><ol class="print-dec">${dec}</ol>
     ${what}
-    <footer><p>${esc(town.typed ? t('print.source_typed') : t('print.source', { date: town.sfd.date, by: town.sfd.prepared_by }))}</p><p>${esc(t('print.foot', { date: ctx.today, rules: ctx.d.rules.data_version }))}</p></footer>`;
+    <footer><p>${esc(basisLine(town, t))}</p><p>${esc(t('print.foot', { date: ctx.today, rules: ctx.d.rules.data_version }))}</p></footer>`;
 }
 
 const VIEW = { overview, sanitation, waste, plan, costs, compare, own, sources };
