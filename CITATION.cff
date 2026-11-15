@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Oeishik
     given-names: Md Zarif
-version: "0.2.0-draft"
-date-released: "2026-11-15"
+version: 0.3.0-draft
+date-released: "2026-11-16"
 license: MIT
 repository-code: "https://github.com/zarifoeishik22/sanitation-waste-planner"
 keywords:

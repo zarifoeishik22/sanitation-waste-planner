@@ -1,425 +1,471 @@
-// The tabs. Each function takes the page context and returns an HTML string. No DOM access, so every tab is testable in Node.
+// The page's views as HTML strings: landing (upload), check (what was read), and the workspace
+// (verdict, the drain and its sandbox, the sizing bridge, the evidence). No DOM access, so every view is testable in Node.
+// System references from the SFD matrix are never shown: every system has a plain name in the strings file.
 
-import { COMPONENTS } from '../engine/sfd.js';
-import { sanScenario, waysToReach } from '../engine/scenario.js';
-import { wfdScenario, wfdView } from '../engine/wfd.js';
-import * as R from './render.js';
-import { waffle, flowbar, ribbons, hbars } from './charts.js';
+import { esc, int, pct, people, qty } from './util.js';
+import { drainScene, sceneScale } from './scene.js';
+import { WFD_FIELDS, COUNTRIES } from './context.js';
+import { rankOf } from '../engine/drain.js';
 
-const { esc, int, pct, round3, nf1 } = R;
-const nf2 = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 2 });
-/** Tonnes and similar quantities: no false precision. */
-export const qty = (v) => (v >= 100 ? int(Math.round(v)) : v >= 10 ? nf1.format(v) : nf2.format(v));
-const UNSAFE = ['f11', 'f15', 'w11c', 's11e'];
+const has = (form, re) => Object.keys(form).some((k) => re.test(k) && String(form[k]).trim() !== '' && Number(form[k]) > 0);
+export const formHasSfd = (form) => has(form, /^share_/);
+export const formHasWfd = (form) => WFD_FIELDS.some((k) => String(form[k] ?? '').trim() !== '');
 
-export const TABS = ['overview', 'sanitation', 'waste', 'plan', 'costs', 'compare', 'own', 'sources'];
+/* ---------- landing ---------- */
 
-const section = (id, title, body, cls = '') => `<section class="block ${cls}" aria-labelledby="h-${id}"><h2 id="h-${id}">${title}</h2>${body}</section>`;
-const faecesTonnes = (ctx, persons) => (persons * ctx.bench.faeces_g_cap_day.value) / 1e6;
-
-export function banners(ctx) {
-  const n = Object.keys(ctx.state.costOverrides).length;
-  return '<div data-banners>' + R.banner(ctx.r, ctx.t) + (n ? `<p class="banner banner-user" role="note">${esc(ctx.t('banner.user_costs', { n }))}</p>` : '')
-    + (ctx.town.typed ? `<p class="banner banner-user" role="note">${esc(ctx.t('banner.typed'))}</p>` : '') + '</div>';
+export function renderLanding(state, d, t) {
+  const reading = state.reading.length
+    ? `<ul class="reading" aria-live="polite">${state.reading.map((m) => `<li class="read-${m.kind}">${esc(t(m.key, m.vars))}</li>`).join('')}</ul>` : '';
+  const towns = d.towns.towns.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const sample = state.showSample ? `<div class="sample">
+      <label for="sample-town">${esc(t('land.sample_pick'))}</label>
+      <select id="sample-town">${towns.map((x) => `<option value="${x.id}"${x.name === 'Ishwardi' ? ' selected' : ''}>${esc(x.name)}${x.district ? `, ${esc(x.district)}` : ''}</option>`).join('')}</select>
+      <button type="button" class="btn" data-act="open-sample">${esc(t('land.sample_open'))}</button>
+    </div>` : '';
+  return `<section class="landing">
+    <h1 class="display">${esc(t('land.h1'))}</h1>
+    <p class="lede">${esc(t('land.lede'))}</p>
+    <label class="drop" id="drop" for="files">
+      <input type="file" id="files" class="visually-hidden" accept="application/pdf,.pdf" multiple data-act="files">
+      <svg class="drop-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8h22l10 10v32H14z"/><path d="M36 8v10h10"/><path d="M24 20h26l-0 36H24" class="sheet2"/><path d="M32 44V30m-6 6 6-6 6 6"/></svg>
+      <span class="drop-title">${esc(t('land.drop'))}</span>
+      <span class="drop-sub">${esc(t('land.drop_sub'))}</span>
+    </label>
+    ${reading}
+    <p class="quiet">${esc(t('land.private'))}</p>
+    <div class="alt">
+      <button type="button" class="link" data-act="show-sample">${esc(t('land.sample'))}</button>
+      <button type="button" class="link" data-act="manual">${esc(t('land.manual'))}</button>
+    </div>
+    ${sample}
+  </section>`;
 }
 
-/* ---------- decisions ---------- */
+/* ---------- check ---------- */
 
-function decisionText(d, ctx) {
-  const { t } = ctx;
-  const v = { share: pct(d.share ?? 0, 0), persons: int(round3(d.persons ?? 0)) };
-  if (d.id === 'contain') {
-    Object.assign(v, { option: d.name, households: int(round3(d.households)), labels: d.labels.map((x) => x.charAt(0).toLowerCase() + x.slice(1)).join('; ') });
-  }
-  if (d.id === 'no_option' || d.id === 'no_option_gw') v.systems = d.systems.join(', ');
-  if (d.id === 'collect') Object.assign(v, { collected: pct(d.collected, 0), tonnes: qty(d.tonnes_day) });
-  if (d.id === 'dumpsite') Object.assign(v, { tonnes: qty(d.tonnes_year), controlled: d.controlled > 0 ? pct(d.controlled, 0) : t('dec.none_of') });
-  if (d.id === 'organics') v.tonnes = qty(d.tonnes_day);
-  const cost = d.cost === 'none' ? '' : d.id === 'treat' && d.cost === 'not_costed' ? t('dec.cost.treat_missing', { missing: d.missing.join(', ') }) : t(`dec.cost.${d.cost}`);
-  const why = d.id === 'dumpsite' && d.share < 0.05 ? 'dec.dumpsite.why_low' : `dec.${d.id}.why`;
-  return { title: t(`dec.${d.id}.title`, v), why: t(why, v), cost };
-}
+const field = (form, key, label, cls = '') => `<label class="fld ${cls}"><span>${esc(label)}</span><input type="text" inputmode="decimal" autocomplete="off" data-own="${key}" value="${esc(form[key] ?? '')}"></label>`;
 
-function decisionList(list, ctx) {
-  if (!list.length) return `<p class="empty">${esc(ctx.t('dec.empty'))}</p>`;
-  return `<ol class="decisions">${list.map((d, i) => {
-    const x = decisionText(d, ctx);
-    return `<li class="decision"><span class="dec-n num">${i + 1}</span><div><h3>${esc(x.title)}</h3><p>${esc(x.why)}</p>${x.cost ? `<p class="dec-cost">${esc(x.cost)}</p>` : ''}</div></li>`;
-  }).join('')}</ol>`;
-}
-
-/* ---------- overview ---------- */
-
-function overview(ctx) {
-  const { r, town, t, wv } = ctx;
-  const c = r.outcome.components;
-  const unsafe = UNSAFE.reduce((a, k) => a + c[k], 0);
-  const persons = unsafe * town.population_sfd;
-  const n10 = Math.round(unsafe * 10);
-  const headline = unsafe >= 0.95 ? t('hero.san_all', { town: town.name }) : unsafe < 0.05 ? t('hero.san_none', { town: town.name }) : t('hero.san', { n: n10, town: town.name });
-  const legend = COMPONENTS.map((k) => `<li><span class="swatch seg-${k}"></span><span class="legend-name">${esc(t(`comp.short.${k}`))}</span><span class="legend-val num">${pct(c[k], 0)}</span></li>`).join('');
-  const san = `<article class="hero">
-    <p class="hero-kicker">${esc(t('hero.kicker_san'))}</p>
-    <h2 class="hero-say">${esc(headline)}</h2>
-    <div class="hero-fig">${waffle(c, t)}<ul class="legend legend-tight">${legend}</ul></div>
-    <p>${esc(t('hero.san_load', { share: pct(unsafe, 0), persons: int(round3(persons)), tonnes: qty(faecesTonnes(ctx, persons)) }))}</p>
-    <p class="source">${esc(t('hero.bench', { value: pct(ctx.bench.san_safe.value, 0), year: ctx.bench.san_safe.year, town: town.name, safe: pct(c.safe, 0) }))}</p>
-    <p><button type="button" class="linkbtn" data-goto="sanitation">${esc(t('hero.more_san'))}</button></p>
-  </article>`;
-  let waste;
-  if (wv) {
-    const fates = wv.fates.slice().sort((a, b) => b.tonnes - a.tonnes).map((f) => ({ label: t(`fate.${f.key}`), value: f.tonnes, text: `${qty(f.tonnes)} t`, note: pct(f.share, 0), strong: f.key === 'water', cls: f.key === 'water' ? 'fill-water' : '' }));
-    waste = `<article class="hero">
-      <p class="hero-kicker">${esc(t('hero.kicker_waste'))}</p>
-      <h2 class="hero-say">${esc(wv.water_kg_day >= 1 ? t('hero.waste', { kg: qty(wv.water_kg_day), town: town.name }) : t('hero.waste_small', { town: town.name, tonnes: qty(wv.plastic_unmanaged_t) }))}</h2>
-      <div class="hero-fig hero-fig-bars"><p class="fig-title">${esc(t('hero.waste_fig', { tonnes: qty(wv.plastic_unmanaged_t) }))}</p>${hbars(fates)}</div>
-      <p>${esc(t('hero.waste_load', { tonnes: qty(wv.plastic_unmanaged_t), share: pct(wv.plastic_unmanaged_share, 0), collected: pct(wv.collected_share, 0), day: qty(wv.uncollected_t_day) }))}</p>
-      <p><button type="button" class="linkbtn" data-goto="waste">${esc(t('hero.more_waste'))}</button></p>
-    </article>`;
-  } else {
-    waste = `<article class="hero hero-empty"><p class="hero-kicker">${esc(t('hero.kicker_waste'))}</p><p>${esc(t('hero.waste_missing'))}</p>
-      <p><button type="button" class="linkbtn" data-goto="own">${esc(t('tab.own'))}</button></p></article>`;
-  }
-  const san2 = ctx.dec.filter((d) => d.domain === 'sanitation').slice(0, 2);
-  const w1 = ctx.dec.filter((d) => d.domain === 'waste').slice(0, 1);
-  const first = section('first', esc(t('sec.first')), `${decisionList([...san2, ...w1], ctx)}
-    <p class="actions"><button type="button" class="btn" data-goto="plan">${esc(t('first.more'))}</button></p>`);
-  return `${banners(ctx)}<div class="heroes">${san}${waste}</div>${first}`;
-}
-
-/* ---------- sanitation ---------- */
-
-function consequences(ctx) {
-  const { r, t, town, bench } = ctx;
-  const c = r.outcome.components;
-  const key = r.outcome.binding.key;
-  const persons = c[key] * town.population_sfd;
-  const b = bench.wash_death_rate;
-  return `<div class="conseq">
-    <h3>${esc(t('conseq.title'))}</h3>
-    <dl>
-      <div><dt>${esc(t('conseq.load_h'))}</dt><dd>${esc(t('conseq.load', { persons: int(round3(persons)), tonnes: qty(faecesTonnes(ctx, persons)) }))} <span class="scope">${esc(t('scope.town'))}</span></dd></div>
-      <div><dt>${esc(t('conseq.health_h'))}</dt><dd>${esc(t('conseq.health', { rate: qty(b.value), year: b.year }))} <span class="scope scope-far">${esc(t('scope.national'))}</span></dd></div>
-      <div><dt>${esc(t('conseq.return_h'))}</dt><dd>${esc(t('conseq.return', { bcr: qty(bench.bcr_sanitation.value) }))} <span class="scope scope-far">${esc(t('scope.global'))}</span></dd></div>
-      <div><dt>${esc(t('conseq.reuse_h'))}</dt><dd>${esc(t('conseq.reuse'))} <span class="scope scope-none">${esc(t('scope.none'))}</span></dd></div>
-    </dl>
-  </div>`;
-}
-
-function sanitation(ctx) {
-  const { r, town, t } = ctx;
-  const c = r.outcome.components;
-  const high = r.settings.gw === 'high';
-  const legend = COMPONENTS.map((k) => `<li class="${k === r.outcome.binding.key ? 'is-binding' : ''}"><span class="swatch seg-${k}"></span>
-    <span class="legend-name">${esc(t(`comp.${k}`))}</span><span class="legend-val num">${pct(c[k])}</span></li>`).join('');
-  const flow = section('outcome', esc(t('sec.outcome', { town: town.name })), `
-    <p class="lead">${esc(t(high ? 'outcome.lead_high' : 'outcome.lead_low', { safe: pct(c.safe) }))}</p>
-    ${ribbons(r.outcome.systems, t)}
-    <ul class="legend">${legend}</ul>
-    <p class="source">${esc(t(high ? 'outcome.source_high' : town.typed ? 'outcome.source_typed' : 'outcome.source_low', { date: town.sfd.date, by: town.sfd.prepared_by }))}</p>`);
-  const binding = R.bindingSection(r, t).replace('</section>', `${consequences(ctx)}</section>`);
-  return [banners(ctx), flow, binding, R.gapSection(r, t), R.rankedSection(r, t), R.chainSection(r, t), R.otherSection(r, t)].join('\n');
-}
-
-/* ---------- solid waste ---------- */
-
-const SWM_STAGES = [['collection', ['S01', 'S02', 'S03', 'S11', 'S10']], ['transport', ['S04', 'S05']], ['recovery', ['S06', 'S07']], ['disposal', ['S08']], ['leakage', ['S09']]];
-
-function tile(label, value, sub) {
-  return `<div class="tile"><p class="tile-label">${esc(label)}</p><p class="tile-value num">${esc(value)}</p>${sub ? `<p class="tile-sub">${esc(sub)}</p>` : ''}</div>`;
-}
-
-function waste(ctx) {
-  const { t, town, wv, d } = ctx;
-  if (!wv) return `${banners(ctx)}${section('waste', esc(t('sec.waste', { town: town.name })), `<p class="empty">${esc(t('hero.waste_missing'))}</p>
-    <p class="actions"><button type="button" class="btn" data-goto="own">${esc(t('tab.own'))}</button></p>`)}`;
-  const tiles = `<div class="tiles">
-    ${tile(t('tile.msw'), `${qty(wv.msw_t_day)} t`, wv.kg_cap_day ? t('tile.msw_sub', { kg: nf2.format(wv.kg_cap_day) }) : t('tile.per_day'))}
-    ${tile(t('tile.collected'), pct(wv.collected_share, 0), t('tile.collected_sub', { tonnes: qty(wv.uncollected_t_day) }))}
-    ${tile(t('tile.plastic'), `${qty(wv.plastic_generated_t)} t`, t('tile.per_year'))}
-    ${tile(t('tile.unmanaged'), `${qty(wv.plastic_unmanaged_t)} t`, t('tile.unmanaged_sub', { share: pct(wv.plastic_unmanaged_share, 0) }))}
-    ${tile(t('tile.water'), `${qty(wv.water_t)} t`, wv.water_kg_person !== null ? t('tile.water_sub', { kg: nf2.format(wv.water_kg_person) }) : t('tile.per_year'))}
-  </div>`;
-  const stageRows = wv.stages.filter((s) => s.tonnes > 0).sort((a, b) => b.tonnes - a.tonnes)
-    .map((s) => ({ label: t(`stage.${s.key}`), value: s.tonnes, text: `${qty(s.tonnes)} t`, note: pct(s.share, 0), strong: s.key === wv.biggest_stage.key }));
-  const fateRows = wv.fates.slice().sort((a, b) => b.tonnes - a.tonnes)
-    .map((f) => ({ label: t(`fate.${f.key}`), value: f.tonnes, text: `${qty(f.tonnes)} t`, note: pct(f.share, 0), strong: f.key === 'water', cls: f.key === 'water' ? 'fill-water' : '' }));
-  const flag = wv.flag ? `<p class="warn">${esc(t('waste.flag', { sum: pct(wv.stage_sum, 0) }))}</p>` : '';
-  const stages = stageRows.length ? section('stages', esc(t('sec.stages')), `<p class="lead">${esc(t('stages.lead', { stage: t(`stage.${wv.biggest_stage.key}`).toLowerCase(), share: pct(wv.biggest_stage.share, 0) }))}</p>${hbars(stageRows)}${flag}`) : '';
-  const fates = fateRows.some((f) => f.value > 0) ? section('fates', esc(t('sec.fates')), `<p class="lead">${esc(t('fates.lead', { kg: qty(wv.water_kg_day) }))}</p>${hbars(fateRows)}`) : '';
-  let bin = '';
-  if (wv.organic_share !== null) {
-    bin = section('bin', esc(t('sec.bin')), `<p class="lead">${esc(t('bin.lead', { organic: pct(wv.organic_share, 0), tonnes: qty(wv.organic_t_day) }))}</p>`);
-  }
-  const items = Object.fromEntries(d.costs.items.map((i) => [i.id, i]));
-  const rows = SWM_STAGES.map(([stage, ids]) => `<tr><th scope="row">${esc(t(`swm.${stage}`))}</th>
-    <td data-label="${esc(t('swm.options'))}">${ids.filter((id) => items[id]).map((id) => esc(items[id].item)).join('; ')}</td>
-    <td data-label="${esc(t('swm.cost'))}"><span class="tag tag-no">${esc(t('chain.no_cost'))}</span></td></tr>`).join('');
-  const options = section('swm', esc(t('sec.swm')), `<p class="lead">${esc(t('swm.lead'))}</p>
-    <div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('swm.stage'))}</th><th scope="col">${esc(t('swm.options'))}</th><th scope="col">${esc(t('swm.cost'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`);
-  const src = town.typed ? t('waste.source_typed') : t('waste.source', { model: d.wfd.model_version, note: d.wfd.note });
-  // A typed or uploaded town with the same name as one of the 50: show the report beside the study's own result.
-  let versus = '';
-  const twin = town.typed ? d.towns.towns.find((x) => x.name.toLowerCase() === town.name.toLowerCase()) : null;
-  if (twin) {
-    const m = wfdView(twin.population_wfd, d.wfd.towns[String(twin.id)]);
-    const st = (v, k) => v.stages.find((x) => x.key === k).tonnes;
-    const ft = (v, k) => v.fates.find((x) => x.key === k).tonnes;
-    const lines = [['plastic', wv.plastic_generated_t, m.plastic_generated_t, 't'], ['collected', wv.collected_share, m.collected_share, '%'], ['unmanaged', wv.plastic_unmanaged_t, m.plastic_unmanaged_t, 't'],
-      ['unmanaged_share', wv.plastic_unmanaged_share, m.plastic_unmanaged_share, '%'], ['uncollected', st(wv, 'uncollected'), st(m, 'uncollected'), 't'], ['disposal', st(wv, 'disposal'), st(m, 'disposal'), 't'],
-      ['burnt', ft(wv, 'burnt'), ft(m, 'burnt'), 't'], ['water', ft(wv, 'water'), ft(m, 'water'), 't']];
-    const show = (v, u) => (u === '%' ? pct(v, 0) : qty(v));
-    const body = lines.map(([k, a, b, u]) => { const big = Math.abs(a - b) > 0.05 * Math.max(Math.abs(a), Math.abs(b), 1e-9) + (u === '%' ? 0.01 : 2);
-      return `<tr><th scope="row">${esc(t(`vs.${k}`))}</th><td class="num" data-label="${esc(t('vs.yours'))}">${show(a, u)}</td><td class="num" data-label="${esc(t('vs.study'))}">${show(b, u)}</td>
-        <td data-label="${esc(t('vs.differs'))}">${big ? `<span class="tag tag-flip">${esc(t('vs.differs_yes'))}</span>` : ''}</td></tr>`; }).join('');
-    versus = section('versus', esc(t('sec.versus', { town: twin.name })), `<p class="lead">${esc(t('vs.lead'))}</p>
-      <div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('vs.figure'))}</th><th scope="col" class="num">${esc(t('vs.yours'))}</th><th scope="col" class="num">${esc(t('vs.study'))}</th><th scope="col">${esc(t('vs.differs'))}</th></tr></thead><tbody>${body}</tbody></table></div>
-      <p class="source">${esc(t('vs.note'))}</p>`);
-  }
-  const head = section('waste', esc(t('sec.waste', { town: town.name })), `${tiles}<p class="source">${esc(src)}</p>`);
-  return [banners(ctx), head, versus, stages, fates, bin, options].join('\n');
-}
-
-/* ---------- plan and what-if ---------- */
-
-export function whatIfSanOut(ctx) {
-  const { r, t, sfdTown, sysIdx, state } = ctx;
-  const sc = sanScenario(r, sfdTown, sysIdx, { uptake: state.uptake / 100, treat: state.treat / 100 });
-  const base = r.outcome.components;
-  const bars = `<div class="ba"><p class="ba-label">${esc(t('wi.today'))}</p>${flowbar(base, t, 'flowbar-sm')}
-    <p class="ba-label">${esc(t('wi.after'))}</p>${flowbar(sc.components, t, 'flowbar-sm')}</div>`;
-  if (!sc.changed) return `${bars}<p class="muted">${esc(t('wi.san.nochange'))}</p>`;
-  const lines = [];
-  lines.push(`<p class="wi-head">${esc(t('wi.san.head', { before: pct(base.safe, 0), after: pct(sc.safe, 0) }))}</p>`);
-  lines.push(`<p>${esc(t('wi.san.people', { persons: int(round3(sc.safe_gain_persons)) }))}</p>`);
-  if (state.uptake > 0 && !sc.has_containment_option) lines.push(`<p class="warn">${esc(t('wi.san.no_option'))}</p>`);
-  if (sc.moved_households > 0) lines.push(`<p>${esc(t('wi.san.moved', { households: int(round3(sc.moved_households)) }))}</p>`);
-  if (sc.treated_persons > 0) lines.push(`<p>${esc(t('wi.san.treated', { persons: int(round3(sc.treated_persons)) }))}</p>`);
-  if (sc.containment_cost) {
-    const m = (k, f) => nf1.format(sc.containment_cost[k][f] / 1e6);
-    const cls = r.placeholder_costs_in_use ? ' ph' : '';
-    lines.push(`<p class="cost-line"><span class="num${cls}">${esc(t('wi.san.cost_contain', { mid: m('mid', 'upfront_total'), low: m('low', 'upfront_total'), high: m('high', 'upfront_total'), amid: m('mid', 'annual_total') }))}</span>
-      ${r.placeholder_costs_in_use ? `<span class="tag tag-ph">${esc(t('ph'))}</span>` : ''}</p>`);
-  }
-  if (state.treat > 0) lines.push(`<p class="warn">${esc(t(sc.treatment_costed ? 'wi.san.cost_treat' : 'wi.san.cost_treat_none'))}</p>`);
-  lines.push(`<p class="source">${esc(t('wi.san.basis'))}</p>`);
-  return bars + lines.join('');
-}
-
-export function waysOut(ctx) {
-  const { r, t, sfdTown, sysIdx, state } = ctx;
-  const target = Number(state.target);
-  if (!(target > 0 && target <= 100)) return '';
-  const w = waysToReach(target / 100, r, sfdTown, sysIdx);
-  if (w.already) return `<p class="empty">${esc(t('ways.already', { target: `${target}%`, today: pct(w.today, 0) }))}</p>`;
-  const cell = (x, key) => (x.level === null ? `<span class="warn">${esc(t('ways.cannot', { max: pct(x.max, 0) }))}</span>` : esc(t(key, { level: pct(x.level, 0) })));
-  const row = (label, x, key) => `<tr><th scope="row">${esc(t(label))}</th><td data-label="${esc(t('ways.needs'))}">${cell(x, key)}</td><td class="num" data-label="${esc(t('ways.max'))}">${pct(x.max, 0)}</td></tr>`;
-  return `<div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('ways.route'))}</th><th scope="col">${esc(t('ways.needs'))}</th><th scope="col" class="num">${esc(t('ways.max'))}</th></tr></thead>
-    <tbody>${row('ways.treat', w.treat_only, 'ways.treat_level')}${row('ways.contain', w.contain_only, 'ways.contain_level')}${row('ways.both', w.both, 'ways.both_level')}</tbody></table></div>`;
-}
-
-export function whatIfWasteOut(ctx) {
-  const { t, wv, state } = ctx;
-  if (!wv) return '';
-  const col = state.wcol === null ? wv.collected_share : state.wcol / 100;
-  const sc = wfdScenario(wv, { collection: col, controlled: state.wctl / 100 });
-  const rows = (p) => [{ label: t('wi.waste.part_unc'), value: p.uncollected, text: `${qty(p.uncollected)} t` }, { label: t('wi.waste.part_chain'), value: p.chain, text: `${qty(p.chain)} t` },
-    { label: t('wi.waste.part_disp'), value: p.disposal, text: `${qty(p.disposal)} t` }];
-  // both charts share one scale so before and after can be compared by eye
-  const max = Math.max(...Object.values(sc.parts_before), ...Object.values(sc.parts_after), 1e-9);
-  const charts = `<div class="ba"><p class="ba-label">${esc(t('wi.today'))}</p>${hbars(rows(sc.parts_before), 'hbars-sm', max)}
-    <p class="ba-label">${esc(t('wi.after'))}</p>${hbars(rows(sc.parts_after), 'hbars-sm', max)}</div>`;
-  if (!sc.changed) return `${charts}<p class="muted">${esc(t('wi.san.nochange'))}</p>`;
-  return `${charts}
-    <p class="wi-head">${esc(t('wi.waste.head', { before: qty(sc.unmanaged_before_t), after: qty(sc.unmanaged_after_t) }))}</p>
-    <p>${esc(t('wi.waste.cut', { cut: qty(sc.cut_t), share: pct(sc.cut_share, 0) }))}</p>
-    <p>${esc(t('wi.waste.unc', { before: qty(wv.uncollected_t_day), after: qty(sc.uncollected_t_day_after) }))}</p>
-    <p class="warn">${esc(t('wi.waste.cost'))}</p>
-    <p class="source">${esc(t('wi.waste.basis'))}</p>`;
-}
-
-function slider(name, label, value, min, t) {
-  return `<label class="slider"><span class="slider-label">${esc(label)}</span>
-    <input type="range" name="${name}" data-lever="${name}" min="${min}" max="100" step="1" value="${value}">
-    <output class="num" data-for="${name}">${value}%</output></label>`;
-}
-
-function plan(ctx) {
-  const { t, town, state, wv } = ctx;
-  const sanList = ctx.dec.filter((d) => d.domain === 'sanitation');
-  const wasteList = ctx.dec.filter((d) => d.domain === 'waste');
-  const list = section('plan', esc(t('sec.plan', { town: town.name })), `<p class="lead">${esc(t('plan.lead'))}</p>
-    <h3 class="group-h">${esc(t('plan.san'))}</h3>${decisionList(sanList, ctx)}
-    <h3 class="group-h">${esc(t('plan.waste'))}</h3>${wv ? decisionList(wasteList, ctx) : `<p class="empty">${esc(t('hero.waste_missing'))}</p>`}`);
-  const wiSan = section('wi-san', esc(t('sec.wi_san')), `<p class="lead">${esc(t('wi.san.lead'))}</p>
-    <div class="whatif"><form class="levers" data-form="levers">
-      ${slider('uptake', t('wi.san.uptake'), state.uptake, 0, t)}
-      ${slider('treat', t('wi.san.treat'), state.treat, 0, t)}
-      <label class="field field-target"><span>${esc(t('wi.san.target'))}</span><input type="number" name="target" data-lever="target" min="1" max="100" step="1" inputmode="numeric" value="${esc(state.target)}"></label>
-    </form><div class="wi-out" id="wi-san-out" aria-live="polite">${whatIfSanOut(ctx)}</div></div>
-    <div id="ways-out" aria-live="polite">${waysOut(ctx)}</div>`);
-  let wiWaste = '';
-  if (wv) {
-    const c0 = Math.round(wv.collected_share * 100);
-    wiWaste = section('wi-waste', esc(t('sec.wi_waste')), `<p class="lead">${esc(t('wi.waste.lead'))}</p>
-      <div class="whatif"><form class="levers" data-form="levers">
-        ${slider('wcol', t('wi.waste.col'), state.wcol === null ? c0 : Math.max(c0, state.wcol), c0, t)}
-        ${slider('wctl', t('wi.waste.ctl'), state.wctl, 0, t)}
-      </form><div class="wi-out" id="wi-waste-out" aria-live="polite">${whatIfWasteOut(ctx)}</div></div>`);
-  }
-  return [banners(ctx), list, wiSan, wiWaste].join('\n');
-}
-
-/* ---------- costs ---------- */
-
-export function costTag(item, edited, t) {
-  if (edited) return `<span class="tag tag-user cost-tag">${esc(t('cost.yours'))}</span>`;
-  if (item.status === 'TO FILL') return `<span class="tag tag-no cost-tag">${esc(t('cost.none'))}</span>`;
-  if (item.status === 'PLACEHOLDER') return `<span class="tag tag-ph cost-tag">${esc(t('ph'))}</span>`;
-  return `<span class="tag tag-yes cost-tag">${esc(t('cost.sourced'))}</span>`;
-}
-
-function costs(ctx) {
-  const { t, d, state } = ctx;
-  const eff = Object.fromEntries(ctx.costs.items.map((i) => [i.id, i]));
-  const cats = [...new Set(d.costs.items.map((i) => i.category))];
-  const input = (it, f, label) => {
-    const v = eff[it.id][f];
-    return `<td data-label="${esc(label)}"><input class="cost-in num" type="number" min="0" step="any" inputmode="decimal" aria-label="${esc(`${it.item}: ${label}`)}" data-cost="${it.id}" data-field="${f}" value="${v === null || v === undefined ? '' : v}"></td>`;
-  };
-  const body = cats.map((cat) => `<tr class="cat"><th colspan="7" scope="colgroup">${esc(cat)}</th></tr>${d.costs.items.filter((i) => i.category === cat).map((it) => `<tr data-row="${it.id}">
-      <th scope="row"><span class="code">${it.id}</span> ${esc(it.item)}<span class="sub">${esc(it.unit)}${it.bearer ? `, ${esc(t('cost.paid_by', { who: it.bearer.toLowerCase() }))}` : ''}</span></th>
-      ${input(it, 'cost_low', t('cost.low'))}${input(it, 'cost_high', t('cost.high'))}
-      ${it.cost_type === 'Per service' ? `<td data-label="${esc(t('cost.life'))}"></td>${input(it, 'uses_per_year', t('cost.uses'))}` : `${input(it, 'lifespan_years', t('cost.life'))}<td data-label="${esc(t('cost.uses'))}"></td>`}
-      <td data-label="${esc(t('cost.status'))}">${costTag(it, Boolean(state.costOverrides[it.id]), t)}</td></tr>`).join('')}`).join('');
-  return `${banners(ctx)}${section('costs', esc(t('sec.costs')), `<p class="lead">${esc(t('costs.lead'))}</p>
-    <p class="actions"><button type="button" class="btn" data-act="save-run">${esc(t('costs.save'))}</button>
-      <label class="btn btn-file">${esc(t('costs.load'))}<input type="file" accept="application/json,.json" data-act="load-run" hidden></label>
-      <button type="button" class="btn btn-quiet" data-act="reset-costs">${esc(t('costs.reset'))}</button></p>
-    <p id="cost-msg" class="muted" aria-live="polite">${esc(state.costMsg || '')}</p>
-    <div class="table-wrap"><table class="grid stack costs"><thead><tr><th scope="col">${esc(t('cost.item'))}</th><th scope="col">${esc(t('cost.low'))}</th><th scope="col">${esc(t('cost.high'))}</th>
-      <th scope="col">${esc(t('cost.life'))}</th><th scope="col">${esc(t('cost.uses'))}</th><th scope="col">${esc(t('cost.status'))}</th></tr></thead><tbody>${body}</tbody></table></div>
-    <p class="source">${esc(t('costs.note'))}</p>`)}`;
-}
-
-/* ---------- compare ---------- */
-
-function compare(ctx) {
-  const { t, town, peers, me, wpeers, wme, d } = ctx;
-  const kg = (v) => `${nf2.format(v)} kg`;
-  const san = section('peers', esc(t('sec.peers', { town: town.name })), `<p class="lead">${esc(t('peers.lead'))}</p>
-    <div class="strips">${R.peersStrips(R.PEER_KEYS, peers, me, t)}${wme ? R.peersStrips(['collected', 'unmanaged'], wpeers, wme, t) + R.peersStrips(['water_kg'], wpeers, wme, t, kg) : ''}</div>`);
-  const w = Object.fromEntries(wpeers.map((p) => [p.id, p]));
-  const sfd = d.sfd.towns;
-  const rows = peers.slice().sort((a, b) => a.name.localeCompare(b.name)).map((p) => {
-    const f = sfd[String(p.id)].flows;
-    const loss = UNSAFE.reduce((a, k) => (f[k] > f[a] ? k : a), 'f11');
-    const x = w[p.id];
-    return `<tr class="${p.id === town.id ? 'is-me' : ''}"><th scope="row"><button type="button" class="linkbtn" data-town="${p.id}">${esc(p.name)}</button></th>
-      <td class="num" data-label="${esc(t('cmp.safe'))}">${pct(p.safe, 0)}</td>
-      <td data-label="${esc(t('cmp.loss'))}"><span class="swatch seg-${loss}"></span> ${esc(t(`comp.short.${loss}`))} <span class="range">${pct(f[loss], 0)}</span></td>
-      <td class="num" data-label="${esc(t('cmp.collected'))}">${pct(x.collected, 0)}</td>
-      <td class="num" data-label="${esc(t('cmp.unmanaged'))}">${pct(x.unmanaged, 0)}</td>
-      <td class="num" data-label="${esc(t('cmp.water'))}">${nf2.format(x.water_kg)}</td></tr>`;
-  }).join('');
-  const table = section('all', esc(t('sec.all')), `<p class="lead">${esc(t('all.lead'))}</p>
-    <div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('cmp.town'))}</th><th scope="col" class="num">${esc(t('cmp.safe'))}</th><th scope="col">${esc(t('cmp.loss'))}</th>
-      <th scope="col" class="num">${esc(t('cmp.collected'))}</th><th scope="col" class="num">${esc(t('cmp.unmanaged'))}</th><th scope="col" class="num">${esc(t('cmp.water'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`);
-  return [banners(ctx), san, table].join('\n');
-}
-
-/* ---------- your town ---------- */
-
-export const WFD_FIELDS = ['msw_t_day', 'collected_pct', 'plastic_generated_t', 'plastic_unmanaged_t', 'stage_uncollected_t', 'stage_collection_t', 'stage_sorting_t', 'stage_transport_t',
-  'stage_disposal_t', 'fate_land_t', 'fate_water_t', 'fate_burnt_t', 'fate_drains_t', 'organic_pct'];
-
-export function ownTotal(form, t) {
+export function shareTotal(form, t) {
   const sum = Object.keys(form).filter((k) => k.startsWith('share_')).reduce((a, k) => a + (Number(form[k]) || 0), 0);
   const ok = sum >= 99 && sum <= 101;
-  return `<span class="${ok ? 'ok' : 'warn'}">${esc(t(ok ? 'own.total_ok' : sum < 99 ? 'own.total_short' : 'own.total_over', { sum: nf1.format(sum), gap: nf1.format(Math.abs(100 - sum)) }))}</span>`;
+  return `<p class="total ${ok ? 'total-ok' : 'total-bad'}">${esc(t(ok ? 'check.sum_ok' : 'check.sum_bad', { sum: sum.toFixed(1), gap: Math.abs(100 - sum).toFixed(1) }))}</p>`;
 }
 
-function own(ctx) {
-  const { t, d, state } = ctx;
+function sfdCard(state, sysIdx, t) {
   const f = state.ownForm;
-  const val = (k) => esc(f[k] ?? '');
-  const field = (k, label, attrs = '') => `<label class="field"><span>${esc(label)}</span><input type="${k === 'name' ? 'text' : 'number'}" name="${k}" data-own="${k}" value="${val(k)}" ${k === 'name' ? 'maxlength="60" autocomplete="off"' : 'min="0" step="any" inputmode="decimal"'} ${attrs}></label>`;
-  const msgs = state.ownMsgs.length ? `<ul class="msgs">${state.ownMsgs.map((m) => `<li class="msg-${m.kind}">${esc(t(m.key, m.vars))}</li>`).join('')}</ul>` : '';
-  const sysRows = d.rules.systems.filter((s) => s.code !== 'T1A3C10' || f.share_T1A3C10).map((s) => `<tr><th scope="row"><span class="code">${s.code}</span> ${esc(s.label)}</th>
-    <td data-label="${esc(t('own.share'))}"><input class="cost-in num" type="number" min="0" max="100" step="any" inputmode="decimal" data-own="share_${s.code}" aria-label="${esc(`${s.label}: ${t('own.share')}`)}" value="${val(`share_${s.code}`)}"></td>
-    <td data-label="${esc(t('own.emptied'))}">${s.group === 'direct' ? '' : `<input class="cost-in num" type="number" min="0" max="100" step="any" inputmode="decimal" data-own="emptied_${s.code}" aria-label="${esc(`${s.label}: ${t('own.emptied')}`)}" value="${val(`emptied_${s.code}`)}">`}</td></tr>`).join('');
-  const upload = section('upload', esc(t('sec.upload')), `<p class="lead">${esc(t('upload.lead'))}</p>
-    <div class="uploads">
-      <label class="upload"><span class="upload-h">${esc(t('upload.sfd'))}</span><span class="sub">${esc(t('upload.sfd_sub'))}</span><input type="file" accept="application/pdf,.pdf" data-act="read-sfd"></label>
-      <label class="upload"><span class="upload-h">${esc(t('upload.wfd'))}</span><span class="sub">${esc(t('upload.wfd_sub'))}</span><input type="file" accept="application/pdf,.pdf" data-act="read-wfd"></label>
+  const codes = Object.keys(sysIdx);
+  const present = codes.filter((c) => Number(f[`share_${c}`]) > 0);
+  if (!present.length && !state.manual) {
+    return `<article class="card card-empty"><h2>${esc(t('check.sfd_h'))}</h2><p>${esc(t('check.sfd_none'))}</p>
+      <label class="btn btn-quiet">${esc(t('check.add_sfd'))}<input type="file" class="visually-hidden" accept="application/pdf,.pdf" data-act="files"></label>
+      <button type="button" class="link" data-act="manual">${esc(t('land.manual'))}</button></article>`;
+  }
+  const absent = codes.filter((c) => !present.includes(c));
+  const rows = present.map((c) => `<tr><th scope="row">${esc(t(`sys.${c}`))}</th><td class="num">${esc(f[`share_${c}`])}%</td>
+      <td class="num">${sysIdx[c].group === 'direct' ? '' : (String(f[`emptied_${c}`] ?? '').trim() === '' ? `<span class="miss">${esc(t('check.blank'))}</span>` : `${esc(f[`emptied_${c}`])}%`)}</td></tr>`).join('');
+  const blank = present.filter((c) => sysIdx[c].group !== 'direct' && String(f[`emptied_${c}`] ?? '').trim() === '');
+  const needSludge = present.some((c) => sysIdx[c].group === 'septic') && String(f.sludge_pct ?? '').trim() === '';
+  const sum = present.reduce((a, c) => a + Number(f[`share_${c}`]), 0);
+  const gap = sum < 99 || sum > 101;
+  const asks = [];
+  if (gap || state.manual) asks.push(`<div class="ask"><p>${esc(t(state.manual && !present.length ? 'check.ask_manual' : 'check.ask_gap'))}</p>
+      <div class="ask-grid">${absent.map((c) => field(f, `share_${c}`, t(`sys.${c}`), 'fld-pct')).join('')}</div></div>`);
+  if (blank.length) asks.push(`<div class="ask"><p>${esc(t('check.ask_emptied'))}</p>
+      <div class="ask-grid">${blank.map((c) => field(f, `emptied_${c}`, t(`sys.${c}`), 'fld-pct')).join('')}</div></div>`);
+  if (needSludge) asks.push(`<div class="ask"><p>${esc(t('check.ask_sludge'))}</p><div class="ask-grid">${field(f, 'sludge_pct', t('check.sludge'), 'fld-pct')}</div></div>`);
+  const edit = present.length ? `<details class="fix"><summary>${esc(t('check.fix'))}</summary><div class="ask-grid">
+      ${present.map((c) => field(f, `share_${c}`, t('check.share_of', { name: t(`sys.${c}`) }), 'fld-pct') + (sysIdx[c].group === 'direct' || blank.includes(c) ? '' : field(f, `emptied_${c}`, t('check.emptied_of', { name: t(`sys.${c}`) }), 'fld-pct'))).join('')}
+      ${needSludge ? '' : field(f, 'sludge_pct', t('check.sludge'), 'fld-pct')}</div></details>` : '';
+  return `<article class="card"><h2>${esc(t('check.sfd_h'))}</h2>
+    ${present.length ? `<table class="read"><thead><tr><th scope="col">${esc(t('check.col_sys'))}</th><th scope="col" class="num">${esc(t('check.col_share'))}</th><th scope="col" class="num">${esc(t('check.col_emptied'))}</th></tr></thead><tbody>${rows}</tbody></table>` : ''}
+    <div id="share-total">${shareTotal(f, t)}</div>
+    ${asks.join('')}${edit}</article>`;
+}
+
+function wfdCard(state, t) {
+  const f = state.ownForm;
+  const present = WFD_FIELDS.filter((k) => String(f[k] ?? '').trim() !== '');
+  if (!present.length && !state.manual) {
+    return `<article class="card card-empty"><h2>${esc(t('check.wfd_h'))}</h2><p>${esc(t('check.wfd_none'))}</p>
+      <label class="btn btn-quiet">${esc(t('check.add_wfd'))}<input type="file" class="visually-hidden" accept="application/pdf,.pdf" data-act="files"></label></article>`;
+  }
+  const absent = WFD_FIELDS.filter((k) => !present.includes(k));
+  const rows = present.map((k) => `<tr><th scope="row">${esc(t(`w.${k}`))}</th><td class="num">${esc(f[k])}</td></tr>`).join('');
+  const ask = absent.length ? `<div class="ask"><p>${esc(t(present.length ? 'check.ask_wfd' : 'check.ask_wfd_manual'))}</p><div class="ask-grid">${absent.map((k) => field(f, k, t(`w.${k}`))).join('')}</div></div>` : '';
+  const edit = present.length ? `<details class="fix"><summary>${esc(t('check.fix'))}</summary><div class="ask-grid">${present.map((k) => field(f, k, t(`w.${k}`))).join('')}</div></details>` : '';
+  return `<article class="card"><h2>${esc(t('check.wfd_h'))}</h2>
+    ${present.length ? `<table class="read"><tbody>${rows}</tbody></table><p class="fine">${esc(t('check.wfd_units'))}</p>` : ''}${ask}${edit}</article>`;
+}
+
+export function renderCheck(state, sysIdx, t) {
+  const f = state.ownForm;
+  const msgs = state.msgs.length ? `<ul class="msgs">${state.msgs.map((m) => `<li class="msg-${m.kind}">${esc(t(m.key, m.vars))}</li>`).join('')}</ul>` : '';
+  return `<section class="check">
+    <h1 class="display display-sm">${esc(t('check.h1'))}</h1>
+    <p class="lede">${esc(t('check.lede'))}</p>
+    <div class="town-fields">
+      ${field(f, 'name', t('check.name'), 'fld-wide')}${field(f, 'population', t('check.population'))}${field(f, 'households', t('check.households'))}
+      <label class="fld"><span>${esc(t('check.country'))}</span><select data-act="country"><option value="">${esc(t('check.country_pick'))}</option>
+        ${COUNTRIES.map((c) => `<option${state.country === c ? ' selected' : ''}>${esc(c)}</option>`).join('')}<option value="other"${state.country === 'other' ? ' selected' : ''}>${esc(t('check.country_other'))}</option></select></label>
     </div>
-    <div id="own-msgs" aria-live="polite">${msgs}</div>`);
-  const san = section('own-san', esc(t('sec.own_san')), `<p class="lead">${esc(t('own.lead'))}</p>
-    <form data-form="own" class="ownform">
-    <div class="fields">${field('name', t('own.name'))}${field('population', t('own.population'))}${field('households', t('own.households'))}${field('sludge_pct', t('own.sludge'), 'max="100"')}</div>
-    <div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('gap.system'))}</th><th scope="col">${esc(t('own.share'))}</th><th scope="col">${esc(t('own.emptied'))}</th></tr></thead><tbody>${sysRows}</tbody></table></div>
-    <p class="own-total" id="own-total" aria-live="polite">${ownTotal(f, t)}</p>
-    <h3 class="group-h">${esc(t('own.waste_h'))}</h3><p class="lead">${esc(t('own.waste_lead'))}</p>
-    <div class="fields">${WFD_FIELDS.map((k) => field(k, t(`own.w.${k}`))).join('')}</div>
-    <p class="actions"><button type="button" class="btn" data-act="use-own">${esc(t('own.use'))}</button> <button type="button" class="btn btn-quiet" data-act="clear-own">${esc(t('own.clear'))}</button></p>
-    </form>
-    <p class="source">${esc(t('own.privacy'))}</p>`);
-  return [banners(ctx), upload, san].join('\n');
+    <div class="check-grid">${sfdCard(state, sysIdx, t)}${wfdCard(state, t)}</div>
+    <div id="check-msgs">${msgs}</div>
+    <div class="check-foot">
+      <button type="button" class="btn btn-main" data-act="analyse">${esc(t('check.go'))}</button>
+      <button type="button" class="link" data-act="restart">${esc(t('check.restart'))}</button>
+    </div>
+  </section>`;
 }
 
-/* ---------- sources ---------- */
+/* ---------- workspace ---------- */
 
-function sources(ctx) {
-  const { t, town, r, me, d, bench } = ctx;
-  const c = r.outcome.components;
-  const fmt = (b) => (b.value === null ? t('bench.missing') : b.unit === 'share' ? pct(b.value, 0) : b.unit === 'USD million' ? `US$ ${qty(b.value)} million` : qty(b.value));
-  const rows = d.benchmarks.items.map((b) => `<tr><th scope="row">${esc(t(`bench.${b.id}`))}</th>
-    <td class="num" data-label="${esc(t('bench.value'))}">${b.value === null ? `<span class="warn">${esc(fmt(b))}</span>` : esc(fmt(b))}</td>
-    <td data-label="${esc(t('bench.scope'))}">${esc(b.scope)}${b.year ? `, ${b.year}` : ''}</td>
-    <td data-label="${esc(t('bench.source'))}"><a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">${esc(b.source)}</a></td></tr>`).join('');
-  const national = section('bench', esc(t('sec.bench')), `<p class="lead">${esc(t('bench.lead', { town: town.name, safe: pct(c.safe, 0), value: pct(bench.san_safe.value, 0), year: bench.san_safe.year }))}</p>
-    <div class="table-wrap"><table class="grid stack"><thead><tr><th scope="col">${esc(t('bench.what'))}</th><th scope="col" class="num">${esc(t('bench.value'))}</th><th scope="col">${esc(t('bench.scope'))}</th><th scope="col">${esc(t('bench.source'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="source">${esc(t('bench.retrieved', { date: d.benchmarks.retrieved }))}</p>`);
-  const links = section('links', esc(t('sec.links')), `<ul class="links">${d.benchmarks.links.map((l) => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(t(`link.${l.id}`))}</a><span class="sub">${esc(t(`link.${l.id}_sub`))}</span></li>`).join('')}</ul>`);
-  const method = section('method', esc(t('sec.method')), `<ul class="plain">${['rank', 'chain', 'whatif', 'waste', 'costs', 'pdf'].map((k) => `<li>${esc(t(`method.${k}`))}</li>`).join('')}</ul>`);
-  return [banners(ctx), national, links, R.notesSection(r, town, me, t), method].join('\n');
+function badge(kind, text) {
+  const icon = { ok: 'M5 12l5 5 9-10', warn: 'M12 7v6m0 4v.5', plain: 'M7 12h10' }[kind];
+  return `<span class="badge badge-${kind}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}"/></svg>${esc(text)}</span>`;
 }
 
-/* ---------- print sheet ---------- */
-
-/** First footer line of the one-page PDF: which reports the figures rest on. */
-export function basisLine(town, t) {
-  if (!town.typed) return `${t('print.basis_pub')} ${t('print.source', { date: town.sfd.date, by: town.sfd.prepared_by })}`;
-  const b = town.basis || { sfd: 'typed', wfd: 'none' };
-  if (b.sfd === 'uploaded' && b.wfd === 'uploaded') return t('print.basis_up');
-  return t('print.basis_mixed', { sfd: t(`print.b.${b.sfd}`), wfd: t(`print.b.${b.wfd}`) });
+export function sourceBadges(ctx) {
+  const { t, listing, isOwn, meta, r, wv } = ctx;
+  const out = [];
+  if (r) {
+    if (listing.status === 'listed') out.push(badge('ok', t('badge.sfd_listed', { year: listing.entry.year || t('badge.no_year') })));
+    else if (listing.status === 'not_listed') out.push(badge('warn', t('badge.sfd_not_listed')));
+    else out.push(badge('plain', t('badge.sfd_not_checked')));
+    if (isOwn && meta.basis && meta.basis.sfd !== 'uploaded') out.push(badge('warn', t(`badge.basis_${meta.basis.sfd}`, { what: 'SFD' })));
+  }
+  if (wv) {
+    if (!isOwn) out.push(badge('plain', t('badge.wfd_dataset')));
+    else if (meta.wfd_portal && meta.basis && meta.basis.wfd === 'uploaded') out.push(badge('ok', t('badge.wfd_portal', { v: meta.wfd_version || '?' })));
+    else out.push(badge('warn', t(`badge.basis_${meta.basis ? meta.basis.wfd : 'typed'}`, { what: 'WFD' })));
+  }
+  return out.join('');
 }
 
-export function renderPrint(ctx) {
-  const { t, town, r, wv, state } = ctx;
-  const c = r.outcome.components;
-  const unsafe = UNSAFE.reduce((a, k) => a + c[k], 0);
-  const persons = unsafe * town.population_sfd;
-  const legend = COMPONENTS.map((k) => `<li><span class="swatch seg-${k}"></span><span class="legend-name">${esc(t(`comp.${k}`))}</span><span class="legend-val num">${pct(c[k])}</span></li>`).join('');
-  const dec = ctx.dec.map((d) => { const x = decisionText(d, ctx); const cost = d.cost === 'placeholder' || d.cost === 'costed' ? t(`dec.cost.${d.cost}_print`) : x.cost;
-    return `<li><strong>${esc(x.title)}.</strong> ${esc(x.why)} ${esc(cost)}</li>`; }).join('');
-  const sc = sanScenario(r, ctx.sfdTown, ctx.sysIdx, { uptake: state.uptake / 100, treat: state.treat / 100 });
-  const what = sc.changed ? `<h2>${esc(t('print.whatif'))}</h2><p>${esc(t('print.whatif_line', { uptake: `${state.uptake}%`, treat: `${state.treat}%`, before: pct(c.safe, 0), after: pct(sc.safe, 0), persons: int(round3(sc.safe_gain_persons)) }))}</p>` : '';
-  const wasteLine = wv ? `<h2>${esc(t('print.waste'))}</h2><p>${esc(t('print.waste_line', { msw: qty(wv.msw_t_day), collected: pct(wv.collected_share, 0), unmanaged: qty(wv.plastic_unmanaged_t), share: pct(wv.plastic_unmanaged_share, 0),
-    water: qty(wv.water_t), stage: t(`stage.${wv.biggest_stage.key}`).toLowerCase(), stage_share: pct(wv.biggest_stage.share, 0) }))}</p>` : '';
-  return `<header><p class="print-app">${esc(t('app.title'))}</p><h1>${esc(town.name)}${town.district ? `, ${esc(town.district)}` : ''}</h1>
-      <p>${esc(t('print.facts', { population: int(town.population_sfd), households: int(Math.round(r.households.households)), gw: t(r.settings.gw === 'high' ? 'set.gw_high' : 'print.gw_low') }))}</p></header>
-    <p class="banner">${esc(t('print.banner'))}</p>
-    <h2>${esc(t('print.san'))}</h2>
-    <div class="print-fig">${waffle(c, t)}<div><p>${esc(t('hero.san_load', { share: pct(unsafe, 0), persons: int(round3(persons)), tonnes: qty(faecesTonnes(ctx, persons)) }))}</p><ul class="legend legend-tight">${legend}</ul></div></div>
-    ${wasteLine}
-    <h2>${esc(t('print.plan'))}</h2><ol class="print-dec">${dec}</ol>
-    ${what}
-    <footer><p>${esc(basisLine(town, t))}</p><p>${esc(t('print.foot', { date: ctx.today, rules: ctx.d.rules.data_version }))}</p></footer>`;
+/** One line saying what the figures rest on: shown under the town name and printed on the PDF. */
+export function basisLine(ctx) {
+  const { t, town, isOwn, meta, r, wv } = ctx;
+  if (!isOwn) return t('basis.published', { date: town.sfd.date, by: town.sfd.prepared_by });
+  const b = meta.basis || { sfd: r ? 'typed' : 'none', wfd: wv ? 'typed' : 'none' };
+  if (b.sfd === 'uploaded' && b.wfd === 'uploaded') return t('basis.uploaded_both');
+  return t('basis.mixed', { sfd: t(`basis.b.${b.sfd}`), wfd: t(`basis.b.${b.wfd}`) });
 }
 
-const VIEW = { overview, sanitation, waste, plan, costs, compare, own, sources };
+function flagText(f, ctx) {
+  const { t } = ctx;
+  const v = f.vars;
+  const m = {
+    compound: () => ({ persons: people(v.persons), tonnes: qty(v.tonnes), both: v.both, n: v.n }),
+    safe_mismatch: () => ({ stated: pct(v.stated), rebuilt: pct(v.rebuilt) }),
+    shares_filled: () => ({ sum: v.sum === null ? '' : pct(v.sum, 1) }),
+    gw_dependence: () => ({ share: pct(v.share), persons: people(v.persons) }),
+    household_size: () => ({ pph: v.pph.toFixed(1) }),
+    sfd_old: () => ({ years: v.years, date: v.date }),
+    wfd_balance: () => ({ sum: pct(v.sum) }),
+    population_gap: () => ({ sfd: int(v.sfd), wfd: int(v.wfd) }),
+    generation_low: () => ({ kg: v.kg.toFixed(2), median: v.median.toFixed(2), n: v.n }),
+    generation_high: () => ({ kg: v.kg.toFixed(2), median: v.median.toFixed(2), n: v.n }),
+    portal_differs: () => ({ ours: int(v.ours), portal: int(v.portal) }),
+    dumpsite_low: () => ({ share: pct(v.share) }),
+    town_note: () => ({ text: v.text }),
+  }[f.id];
+  const key = f.id === 'shares_filled' && v.sum === null ? 'flag.shares_edited' : `flag.${f.id}`;
+  return t(key, m ? m() : {});
+}
 
-export function renderTab(ctx) {
-  return (VIEW[ctx.state.tab] || overview)(ctx);
+function actionCard(a, ctx) {
+  const { t, full } = ctx;
+  const line = (id) => full.lines.find((l) => l.id === id);
+  let title; let why; let takes;
+  if (a.id === 'treat') {
+    title = t('act.treat'); why = t('act.treat_why', { persons: people(a.persons), share: pct(a.share) });
+    const [v, f, b] = [line('vehicles'), line('fstp'), line('beds')];
+    takes = v ? t('act.treat_takes', { vehicles: int(v.units.value), m3: qty(f.units.value), m2: int(b.units.value) }) : '';
+  } else if (a.id === 'contain') {
+    title = t(`opt.${a.name}`); why = t('act.contain_why', { households: people(a.households), persons: people(a.persons) });
+    takes = t('act.contain_takes', { households: people(a.households) });
+  } else if (a.id === 'no_option_gw') {
+    title = t('act.shared'); why = t('act.shared_why', { persons: people(a.persons) });
+    const l = line('shared_treatment'); takes = l ? t('act.shared_takes', { flow: int(l.units.value) }) : '';
+  } else if (a.id === 'collect') {
+    title = t('act.collect'); why = t('act.collect_why', { share: pct(1 - a.collected), tonnes: qty(a.tonnes_day) });
+    const l = line('collection'); takes = l ? t('act.collect_takes', { vans: int(l.units.value), to: pct(l.deficit.to) }) : '';
+  } else if (a.id === 'dumpsite') {
+    title = t('act.dumpsite'); why = t('act.dumpsite_why', { tonnes: int(a.tonnes_year) }); takes = t('act.unsized');
+  } else if (a.id === 'organics') {
+    title = t('act.organics'); why = t('act.organics_why', { share: pct(a.share), tonnes: qty(a.tonnes_day) });
+    const l = line('compost'); takes = l ? t('act.organics_takes', { capacity: int(l.units.value), compost: qty(l.units.compost_t_day) }) : '';
+  } else {
+    title = t('act.handling'); why = t('act.handling_why', { share: pct(a.share) }); takes = t('act.unsized');
+  }
+  return `<li class="action action-${a.domain}"><h3>${esc(title)}</h3><p>${esc(why)}</p>${takes ? `<p class="takes">${esc(takes)}</p>` : ''}
+    ${a.lever ? `<button type="button" class="link" data-act="try" data-lever="${a.lever}">${esc(t('act.try'))}</button>` : ''}</li>`;
+}
+
+export function verdictSection(ctx) {
+  const { t, town, verdict: v, flags: fl } = ctx;
+  const s = v.sanitation;
+  const san = s ? `<h2 class="verdict-line">${esc(t(`fail.${s.key}`, { town: town.name }))}</h2>
+    <p class="verdict-sub">${esc(t(s.key === 'mostly_safe' ? 'fail.sub_safe' : 'fail.sub', { persons: people(s.persons), share: pct(s.share), safe: pct(s.safe), unsafe: people(s.unsafe_persons) }))}</p>` : '';
+  const w = v.waste;
+  const waste = w ? `<${s ? 'p' : 'h2'} class="${s ? 'verdict-waste' : 'verdict-line'}">${esc(t(`fail.waste_${w.stage}`, { town: town.name, uncollected: pct(w.uncollected_share), tonnes: qty(w.uncollected_t_day), stage_share: pct(w.stage_share) }))}</${s ? 'p' : 'h2'}>
+    <p class="verdict-sub">${esc(t('fail.waste_sub', { unmanaged: int(w.unmanaged_t), share: pct(w.unmanaged_share), water: qty(w.water_t), drain: qty(w.drain_t) }))}</p>` : '';
+  const top = fl.filter((f) => f.id !== 'town_note').slice(0, 3);
+  const flagsHtml = top.length
+    ? `<ul class="flaglist">${top.map((f) => `<li class="flag flag-${f.level}">${esc(flagText(f, ctx))}</li>`).join('')}</ul>`
+    : `<p class="flag-none">${esc(t('flag.none'))}</p>`;
+  const more = fl.length > top.length ? `<a class="link" href="#evidence">${esc(t('flag.more', { n: fl.length }))}</a>` : '';
+  return `<section class="verdict" id="verdict" aria-labelledby="verdict-h">
+    <div class="verdict-head" id="verdict-h">${san}${waste}</div>
+    <div class="verdict-grid">
+      <div class="first"><h3 class="minor">${esc(t('verdict.actions'))}</h3><ol class="actions">${v.actions.map((a) => actionCard(a, ctx)).join('')}</ol></div>
+      <div class="checks"><h3 class="minor">${esc(t('verdict.flags'))}</h3>${flagsHtml}${more}</div>
+    </div>
+  </section>`;
+}
+
+/* ----- the drain and its sandbox ----- */
+
+export function sceneBlock(ctx) {
+  const { t, ex0, ex1, pl0, pl1 } = ctx;
+  const sc = sceneScale(ex0, pl0);
+  const labels = `<span class="lab lab-drain">${esc(t('rcv.drain'))}</span><span class="lab lab-water">${esc(t('rcv.water'))}</span><span class="lab lab-ground">${esc(t('rcv.ground'))}</span>
+    ${ex0 ? `<span class="lab lab-dumped">${esc(t('rcv.dumped'))}</span>` : ''}${pl0 ? `<span class="lab lab-burnt">${esc(t('rcv.burnt'))}</span>` : ''}`;
+  const key = [ex0 ? `<span class="key"><svg viewBox="0 0 12 12" aria-hidden="true"><circle class="dot" cx="6" cy="6" r="4.2"/></svg>${esc(t('scene.key_dot', { n: int(sc.perDot) }))}</span>` : '',
+    pl0 ? `<span class="key"><svg viewBox="0 0 14 12" aria-hidden="true"><rect class="fleck" x="2" y="3.5" width="10" height="5" rx="1"/></svg>${esc(t('scene.key_fleck', { n: qty(sc.perFleck) }))}</span>` : '',
+    `<span class="key key-note">${esc(t('scene.schematic'))}</span>`].join('');
+  return `<div class="scene-box">${drainScene({ ex0, ex1, pl0, pl1, label: esc(t('scene.aria')) })}${labels}</div><div class="scene-key">${key}</div>`;
+}
+
+export function receiversBlock(ctx) {
+  const { t, ex0, ex1, pl0, pl1, touched } = ctx;
+  const row = (cls, now, was, fmt, unitKey) => {
+    const changed = touched && Math.abs(now - was) > 1e-9;
+    return `<p class="load load-${cls}"><span class="load-n num">${fmt(now)}</span> <span class="load-u">${esc(t(unitKey))}</span>${changed ? `<span class="load-was">${esc(t('rcv.was', { n: fmt(was) }))}</span>` : ''}</p>`;
+  };
+  const card = (k, exKey, plKey) => {
+    const e = ex0 && exKey ? row('ex', ex1.receivers[exKey].persons, ex0.receivers[exKey].persons, people, 'rcv.u_people') : '';
+    const p = pl0 && plKey ? row('pl', pl1.receivers[plKey].tonnes, pl0.receivers[plKey].tonnes, qty, 'rcv.u_tonnes') : '';
+    return `<div class="rcv rcv-${k}"><h3>${esc(t(`rcv.${k}`))}</h3>${e}${p}<p class="rcv-note">${esc(t(`rcv.${k}_note`))}</p></div>`;
+  };
+  return card('drain', 'drain', 'drain') + card('water', 'water', 'water') + card('ground', 'ground', 'ground')
+    + `<div class="rcv rcv-unseen"><h3>${esc(t('rcv.unseen'))}</h3>
+      ${ex0 ? row('ex', ex1.receivers.dumped.persons, ex0.receivers.dumped.persons, people, 'rcv.u_dumped') : ''}
+      ${pl0 ? row('pl', pl1.receivers.burnt.tonnes, pl0.receivers.burnt.tonnes, qty, 'rcv.u_burnt') : ''}
+      <p class="rcv-note">${esc(t('rcv.unseen_note'))}</p></div>`;
+}
+
+export function readoutBlock(ctx) {
+  const { t, r, sc, wv, ws, touched, recovered } = ctx;
+  const items = [];
+  if (r) {
+    const now = sc.safe; const was = r.outcome.components.safe;
+    items.push(`<div class="ro"><dt>${esc(t('ro.safe'))}</dt><dd><span class="num big">${pct(now)}</span>${touched && Math.abs(now - was) > 1e-9 ? `<span class="ro-was">${esc(t('rcv.was', { n: pct(was) }))}</span>` : ''}</dd></div>`);
+  }
+  if (wv) {
+    items.push(`<div class="ro"><dt>${esc(t('ro.plastic'))}</dt><dd><span class="num big">${int(ws.unmanaged_after_t)}</span> ${esc(t('ro.t_year'))}${touched && ws.changed ? `<span class="ro-was">${esc(t('rcv.was', { n: int(ws.unmanaged_before_t) }))}</span>` : ''}</dd></div>`);
+  }
+  const rec = [];
+  if (touched && recovered.compost_t_day !== null) rec.push(t('ro.compost', { n: qty(recovered.compost_t_day) }));
+  if (touched && recovered.sludge_solids_t_year !== null && ctx.levers.treat > 0) rec.push(t('ro.solids', { n: int(recovered.sludge_solids_t_year) }));
+  if (rec.length) items.push(`<div class="ro ro-wide"><dt>${esc(t('ro.recovered'))}</dt><dd>${esc(rec.join(' '))}</dd></div>`);
+  return `<dl class="readout">${items.join('')}</dl>`;
+}
+
+function slider(id, label, value, min, hint, t) {
+  return `<label class="lever" for="lv-${id}"><span class="lever-l">${esc(label)}</span><output class="num" id="out-${id}" for="lv-${id}">${value}%</output>
+    <input type="range" id="lv-${id}" data-lever="${id}" min="${min}" max="100" step="1" value="${value}">${hint ? `<span class="lever-h">${esc(hint)}</span>` : ''}</label>`;
+}
+
+export function leversBlock(ctx) {
+  const { t, r, wv, state } = ctx;
+  const out = [`<div class="presets"><button type="button" class="chip" data-act="preset" data-preset="today">${esc(t('lv.today'))}</button><button type="button" class="chip" data-act="preset" data-preset="full">${esc(t('lv.full'))}</button></div>`];
+  if (r) {
+    out.push(slider('uptake', t('lv.uptake'), state.uptake, 0, r.summary.options.length ? '' : t('lv.uptake_none'), t));
+    out.push(slider('treat', t('lv.treat'), state.treat, 0, '', t));
+  }
+  if (wv) {
+    const c0 = Math.round(wv.collected_share * 100);
+    out.push(slider('wcol', t('lv.collection'), state.wcol === null ? c0 : Math.max(c0, state.wcol), c0, t('lv.collection_h', { now: `${c0}%` }), t));
+    out.push(slider('wctl', t('lv.controlled'), state.wctl, 0, '', t));
+    if (wv.organic_share) out.push(`<label class="toggle"><input type="checkbox" data-lever="compost"${state.compost ? ' checked' : ''}> <span>${esc(t('lv.compost', { share: pct(wv.organic_share) }))}</span></label>`);
+  }
+  if (r) out.push(`<label class="toggle toggle-test"><input type="checkbox" data-lever="gw"${state.gw === 'high' ? ' checked' : ''}> <span>${esc(t('lv.gw'))}</span></label>`);
+  return out.join('');
+}
+
+export function sandboxSection(ctx) {
+  const { t, r, wv } = ctx;
+  const one = !r ? `<p class="one-report">${esc(t('box.no_sfd'))}</p>` : !wv ? `<p class="one-report">${esc(t('box.no_wfd'))}</p>` : '';
+  return `<section class="sandbox" id="sandbox" aria-labelledby="box-h">
+    <h2 id="box-h">${esc(t('box.h'))}</h2>
+    <p class="section-lede">${esc(t('box.lede'))}</p>${one}
+    <div class="box-grid">
+      <figure class="scene-wrap" id="scene">${sceneBlock(ctx)}</figure>
+      <form class="levers" id="levers" aria-label="${esc(t('lv.aria'))}">${leversBlock(ctx)}<div id="readout">${readoutBlock(ctx)}</div></form>
+    </div>
+    <div class="receivers" id="receivers">${receiversBlock(ctx)}</div>
+    <p class="fine">${esc(t('box.fine'))}</p>
+  </section>`;
+}
+
+/* ----- the sizing bridge ----- */
+
+const UNIT = { households: 'u.households', people: 'u.people', vehicles: 'u.vehicles', m3_day: 'u.m3_day', m3_year: 'u.m3_year', kg_ts_year: 'u.kg_ts_year', m2: 'u.m2', vans: 'u.vans', t_day: 'u.t_day', t_day_capacity: 'u.t_day_capacity' };
+
+function lineText(l, ctx) {
+  const { t, rules, d } = ctx;
+  const u = (k) => t(UNIT[k]);
+  const dv = l.deficit;
+  const title = l.kind === 'contain' ? t(`opt.${l.name}`) : t(`line.${l.kind}`);
+  let deficit; let rule; let units = `${int(l.units.value)} ${u(l.units.unit)}`;
+  const lvl = (x) => (x < 1 ? t('line.level', { level: pct(x) }) : '');
+  if (l.kind === 'contain') { deficit = t('line.contain_def', { n: int(dv.value) }) + lvl(dv.level); rule = t('rule.one_per_household'); units = t('line.contain_units', { n: int(l.units.value) }); }
+  else if (l.kind === 'shared_treatment') { deficit = t('line.shared_def', { n: people(dv.value) }) + lvl(dv.level); rule = t('rule.flow', { l: rules.wastewater_l_cap_day }); }
+  else if (l.kind === 'vehicles') { deficit = t('line.vehicles_def', { n: int(dv.households) }) + lvl(dv.level); rule = t('rule.vehicles', { years: rules.empty_interval_years, n: int(dv.emptyings), trips: rules.trips_per_vehicle_day, days: rules.working_days }); }
+  else if (l.kind === 'fstp') { deficit = t('line.fstp_def', { n: int(dv.emptyings) }); rule = t('rule.fstp', { vol: rules.volume_per_emptying_m3, total: int(dv.volume), days: rules.working_days }); units = `${qty(l.units.value)} ${u('m3_day')}`; }
+  else if (l.kind === 'beds') { deficit = t('line.beds_def', { n: int(dv.volume) }); rule = t('rule.beds', { ts: rules.sludge_ts_kg_m3, solids: int(dv.value), load: rules.drying_bed_loading }); }
+  else if (l.kind === 'collection') { deficit = t('line.collection_def', { n: qty(dv.value), from: pct(dv.from), to: pct(dv.to) }); rule = t('rule.collection', { t: rules.collection_vehicle_t_day }); }
+  else if (l.kind === 'compost') { deficit = t('line.compost_def', { n: qty(dv.value), share: pct(dv.organic) }); rule = t('rule.compost', { capture: pct(rules.organic_capture), at: qty(dv.at_plant), mod: rules.compost_module_t_day, yield: rules.compost_yield });
+    units = t('line.compost_units', { modules: l.units.modules, cap: int(l.units.value), compost: qty(l.units.compost_t_day) }); }
+  else { deficit = t('line.disposal_def', { n: qty(dv.value) }); rule = t('rule.none'); units = t('line.unsized'); }
+  const statuses = l.rule.ids.map((id) => d.sizing.rules.find((x) => x.id === id).status);
+  const tag = l.kind === 'contain' || !statuses.length ? (l.kind === 'disposal' ? null : 'assumption') : statuses.every((s) => s === 'CITED') ? 'cited' : statuses.some((s) => s === 'CITED') ? 'mixed' : 'assumption';
+  return { title, deficit, rule, units, tag };
+}
+
+export function lineTotals(l, ctx) {
+  const { t, state } = ctx;
+  if (l.unsized) return `<span class="none">${esc(t('line.unsized'))}</span>`;
+  if (l.capex_total === null && l.opex_total === null) return `<span class="none">${esc(t('line.no_rate'))}</span>`;
+  const cur = state.currency ? `${state.currency} ` : '';
+  return `${l.capex_total !== null ? `<span class="num big">${esc(cur)}${int(l.capex_total)}</span>` : ''}${l.opex_total !== null && l.opex_total > 0 ? `<span class="per-year">${esc(t('line.per_year', { n: `${cur}${int(l.opex_total)}` }))}</span>` : ''}
+    <span class="tag tag-${l.rate.source}">${esc(t(`rate.${l.rate.source}`))}</span>`;
+}
+
+function bridgeLine(l, ctx) {
+  const { t, state } = ctx;
+  const x = lineText(l, ctx);
+  const user = state.rates[l.id] || {};
+  const hint = (v) => (v !== null && v > 0 ? ` placeholder="${esc(t('rate.hint', { n: int(v) }))}"` : '');
+  const val = (k) => (user[k] !== undefined && user[k] !== null ? user[k] : l.rate.source === 'reviewed' && l.rate[k] !== null ? l.rate[k] : '');
+  const rates = l.unsized ? `<span class="none">${esc(t('line.unsized'))}</span>` : `
+      <label class="rate"><span>${esc(t('rate.capex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="capex" data-line="${esc(l.id)}" value="${esc(val('capex'))}"${hint(l.rate.hint_capex)}></label>
+      <label class="rate"><span>${esc(t('rate.opex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="opex" data-line="${esc(l.id)}" value="${esc(val('opex'))}"${hint(l.rate.hint_opex)}></label>`;
+  return `<article class="line line-${l.domain}"><h3>${esc(x.title)}</h3>
+    <ol class="bridge">
+      <li><span class="k">${esc(t('br.deficit'))}</span><span class="v">${esc(x.deficit)}</span></li>
+      <li><span class="k">${esc(t('br.rule'))}${x.tag ? ` <span class="tag tag-${x.tag}">${esc(t(`tag.${x.tag}`))}</span>` : ''}</span><span class="v">${esc(x.rule)}</span></li>
+      <li><span class="k">${esc(t('br.units'))}</span><span class="v strong">${esc(x.units)}</span></li>
+      <li><span class="k">${esc(t('br.rates'))}</span><span class="v rates">${rates}</span></li>
+      <li><span class="k">${esc(t('br.total'))}</span><span class="v" data-total="${esc(l.id)}">${lineTotals(l, ctx)}</span></li>
+    </ol></article>`;
+}
+
+export function totalsBlock(ctx) {
+  const { t, sizing, state } = ctx;
+  const tt = sizing.totals;
+  if (!sizing.lines.length) return '';
+  if (!tt.priced) return `<p class="totals totals-none">${esc(t('tot.none'))}</p>`;
+  const cur = state.currency ? `${state.currency} ` : '';
+  return `<p class="totals"><span class="tot-k">${esc(t('tot.capex'))}</span> <span class="num big">${esc(cur)}${int(tt.capex)}</span>
+    ${tt.opex > 0 ? `<span class="tot-k">${esc(t('tot.opex'))}</span> <span class="num big">${esc(cur)}${int(tt.opex)}</span>` : ''}
+    <span class="tot-note">${esc(t(tt.unpriced ? 'tot.partial' : 'tot.all', { priced: tt.priced, total: tt.priced + tt.unpriced }))}</span></p>`;
+}
+
+export function bridgeBlock(ctx) {
+  const { t, sizing, touched } = ctx;
+  if (!sizing.lines.length) return `<p class="empty">${esc(t('size.none'))}</p>`;
+  const san = sizing.lines.filter((l) => l.domain === 'sanitation');
+  const waste = sizing.lines.filter((l) => l.domain === 'waste');
+  return `<p class="basis-line">${esc(t(touched ? 'size.for_plan' : 'size.for_full'))}</p>
+    ${san.length ? `<h3 class="minor">${esc(t('size.san'))}</h3>${san.map((l) => bridgeLine(l, ctx)).join('')}` : ''}
+    ${waste.length ? `<h3 class="minor">${esc(t('size.waste'))}</h3>${waste.map((l) => bridgeLine(l, ctx)).join('')}` : ''}`;
+}
+
+function rulesTable(ctx) {
+  const { t, d, state } = ctx;
+  const rows = d.sizing.rules.map((x) => `<tr><th scope="row">${esc(x.label)}<span class="src">${x.url ? `<a href="${esc(x.url)}" rel="noopener noreferrer" target="_blank">${esc(x.source)}</a>` : esc(x.source)}${x.caveat ? ` ${esc(x.caveat)}` : ''}</span></th>
+      <td><input type="text" inputmode="decimal" autocomplete="off" class="rule-in" data-rule="${x.id}" value="${esc(state.ruleOverrides[x.id] ?? x.value)}" aria-label="${esc(x.label)}"> <span class="unit">${esc(x.unit)}</span></td>
+      <td><span class="tag tag-${x.status === 'CITED' ? 'cited' : 'assumption'}">${esc(t(`tag.${x.status === 'CITED' ? 'cited' : 'assumption'}`))}</span><span class="range">${esc(t('rules.range', { low: x.low, high: x.high }))}</span></td></tr>`).join('');
+  return `<details class="rules"><summary>${esc(t('rules.h'))}</summary><p class="fine">${esc(t('rules.lede'))}</p>
+    <div class="table-wrap"><table class="rules-table"><thead><tr><th scope="col">${esc(t('rules.col_rule'))}</th><th scope="col">${esc(t('rules.col_value'))}</th><th scope="col">${esc(t('rules.col_status'))}</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+}
+
+export function sizingSection(ctx) {
+  const { t, state } = ctx;
+  return `<section class="sizing" id="sizing" aria-labelledby="size-h">
+    <h2 id="size-h">${esc(t('size.h'))}</h2>
+    <p class="section-lede">${esc(t('size.lede'))}</p>
+    <label class="fld fld-cur"><span>${esc(t('size.currency'))}</span><input type="text" maxlength="6" autocomplete="off" data-act="currency" value="${esc(state.currency)}" placeholder="${esc(t('size.currency_ph'))}"></label>
+    <div id="bridge">${bridgeBlock(ctx)}</div>
+    <div id="totals">${totalsBlock(ctx)}</div>
+    ${rulesTable(ctx)}
+    <div class="runfile">
+      <button type="button" class="btn btn-quiet" data-act="save-run">${esc(t('run.save'))}</button>
+      <label class="btn btn-quiet">${esc(t('run.load'))}<input type="file" class="visually-hidden" accept="application/json,.json" data-act="load-run"></label>
+      <span id="run-msg" class="fine">${esc(state.runMsg || '')}</span>
+    </div>
+  </section>`;
+}
+
+/* ----- evidence ----- */
+
+function strip(label, value, values, fmt, t, lowIsGood) {
+  if (value === null || value === undefined) return '';
+  const xs = values.filter((v) => typeof v === 'number');
+  const max = Math.max(...xs, value) || 1;
+  const x = (v) => (10 + (v / max) * 280).toFixed(1);
+  const rank = rankOf(value, xs);
+  const worse = lowIsGood ? Math.round(rank * xs.length) : Math.round((1 - rank) * xs.length);
+  return `<div class="strip"><p class="strip-l">${esc(label)} <strong class="num">${esc(fmt(value))}</strong></p>
+    <svg viewBox="0 0 300 26" class="strip-svg" role="img" aria-label="${esc(t('ev.strip_aria', { label, value: fmt(value) }))}"><path class="axis" d="M10 18h280"/>${xs.map((v) => `<circle class="peer" cx="${x(v)}" cy="18" r="3"/>`).join('')}<path class="me" d="M${x(value)} 4v20"/></svg>
+    <p class="strip-n">${esc(t('ev.rank', { worse: Math.max(0, Math.min(xs.length, worse)), n: xs.length }))}</p></div>`;
+}
+
+export function evidenceSection(ctx) {
+  const { t, town, isOwn, meta, r, wv, listing, flags: fl, paired, pairedOn, me, bench, d, country, portal } = ctx;
+  const src = [];
+  if (r) {
+    src.push(`<li><strong>${esc(t('ev.sfd'))}</strong> ${esc(isOwn ? t('ev.sfd_own', { date: meta.sfd_date || t('ev.no_date') }) : t('ev.sfd_built', { date: town.sfd.date, by: town.sfd.prepared_by }))}
+      ${esc(t(`ev.listing_${listing.status}`, { name: listing.entry ? listing.entry.name : town.name, year: listing.entry && listing.entry.year ? listing.entry.year : t('badge.no_year'), date: d.pubindex.retrieved }))}
+      ${listing.file ? esc(t('ev.file', { id: listing.file.id, date: listing.file.date || '' })) : ''} <a href="${esc(d.pubindex.url)}" rel="noopener noreferrer" target="_blank">${esc(t('ev.susana'))}</a></li>`);
+  }
+  if (wv) {
+    src.push(`<li><strong>${esc(t('ev.wfd'))}</strong> ${esc(isOwn ? t(meta.wfd_portal ? 'ev.wfd_portal' : 'ev.wfd_typed', { v: meta.wfd_version || '?', model: meta.wfd_model || '?' }) : t('ev.wfd_dataset'))}
+      ${portal ? esc(t('ev.wfd_portal_fig', { ours: int(wv.plastic_unmanaged_t), portal: int(portal.plastic_unmanaged_t), date: portal.retrieved })) : ''}</li>`);
+  }
+  const nat = country && d.benchmarks.countries[country];
+  const jmp = `<li><strong>${esc(t('ev.jmp'))}</strong> ${esc(r && nat ? t('ev.jmp_line', { town: town.name, safe: pct(r.outcome.components.safe), country, nat: pct(nat.san_safe_national), year: nat.year }) : t('ev.jmp_none', { country: country && country !== 'other' ? country : t('ev.this_country') }))}
+      ${esc(t('ev.jmp_def'))} ${esc(t('ev.jmp_urban', { v: pct(bench.jmp_urban_global.value), year: bench.jmp_urban_global.year }))}</li>
+    <li><strong>${esc(t('ev.glaas'))}</strong> ${esc(t('ev.glaas_line'))}</li>`;
+  const strips = pairedOn && me ? [
+    r ? strip(t('ev.s_safe'), me.safe, paired.map((p) => p.safe), (v) => pct(v), t, true) : '',
+    r ? strip(t('ev.s_open'), me.open_share, paired.map((p) => p.open_share), (v) => pct(v), t, false) : '',
+    wv ? strip(t('ev.s_plastic'), me.plastic_kg_person, paired.map((p) => p.plastic_kg_person), (v) => `${v.toFixed(2)} kg`, t, false) : '',
+  ].join('') : `<p class="fine">${esc(t('ev.no_peers'))}</p>`;
+  return `<section class="evidence" id="evidence" aria-labelledby="ev-h">
+    <h2 id="ev-h">${esc(t('ev.h'))}</h2>
+    <details open><summary>${esc(t('ev.sources_h'))}</summary><ul class="ev-list">${src.join('')}${jmp}</ul></details>
+    <details${fl.length ? ' open' : ''}><summary>${esc(t('ev.flags_h', { n: fl.length }))}</summary>
+      ${fl.length ? `<ul class="flaglist">${fl.map((f) => `<li class="flag flag-${f.level}">${esc(flagText(f, ctx))}</li>`).join('')}</ul>` : `<p class="fine">${esc(t('flag.none'))}</p>`}
+      <p class="fine">${esc(t('ev.flags_note'))}</p></details>
+    <details><summary>${esc(t('ev.peers_h'))}</summary><div class="strips">${strips}</div><p class="fine">${esc(t('ev.peers_note'))}</p></details>
+    <details><summary>${esc(t('ev.limits_h'))}</summary><ul class="ev-list">${['1', '2', '3', '4', '5', '6'].map((k) => `<li>${esc(t(`ev.limit_${k}`))}</li>`).join('')}</ul></details>
+  </section>`;
+}
+
+export function renderWork(ctx) {
+  const { t, town, r, wv } = ctx;
+  const facts = [t('work.population', { n: int(town.population_sfd) })];
+  if (r) facts.push(t('work.households', { n: int(Math.round(r.households.households)) }));
+  if (town.district) facts.unshift(t('work.district', { d: town.district }));
+  return `<header class="townbar">
+      <div class="townbar-id"><h1 class="town">${esc(town.name)}</h1><p class="town-facts">${esc(facts.join(' '))}</p></div>
+      <div class="townbar-acts"><button type="button" class="btn btn-quiet" data-act="pdf">${esc(t('work.pdf'))}</button><button type="button" class="btn btn-quiet" data-act="restart">${esc(t('work.another'))}</button></div>
+      <div class="badges">${sourceBadges(ctx)}</div>
+      <p class="basis">${esc(basisLine(ctx))} <span class="print-only">${esc(t('work.printed', { date: ctx.today }))}</span></p>
+    </header>
+    ${verdictSection(ctx)}
+    <p class="draft">${esc(t('work.draft'))}</p>
+    ${sandboxSection(ctx)}${sizingSection(ctx)}${evidenceSection(ctx)}`;
 }

@@ -5,60 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="description" content="Draft planning tool: reads a Bangladeshi municipality's excreta and waste flow diagrams and turns them into an ordered plan. Runs in the browser.">
+<meta name="description" content="Draft planning tool. Reads a town's excreta flow diagram (SFD) and waste flow diagram (WFD) together and sizes what to build. Runs in the browser; files are not uploaded.">
 <title>Sanitation and waste planner (draft)</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/site.css">
 </head>
 <body>
 <header class="masthead">
-  <p class="wordmark" data-i18n="app.title">Sanitation and waste planner</p>
-  <p class="tagline" data-i18n="app.tagline">From a town's excreta and waste flow diagrams to a plan. Bangladeshi municipalities.</p>
+  <a class="wordmark" href="./" data-i18n="app.title">Sanitation and waste planner</a>
+  <p class="tagline" data-i18n="app.tag">From an SFD and a WFD to what to build</p>
 </header>
-<div class="layout">
-  <aside class="rail" aria-label="Town and assumptions">
-    <div class="titleblock">
-      <label class="rail-label" for="town" data-i18n="rail.town">Town</label>
-      <select id="town"></select>
-      <div id="facts"></div>
-    </div>
-    <details class="settings-wrap" id="settings-wrap">
-    <summary data-i18n="rail.settings">Assumptions you can change</summary>
-    <form class="settings" id="settings">
-      <fieldset>
-        <legend data-i18n="set.gw">Groundwater or flood risk</legend>
-        <label><input type="radio" name="gw" value="low" checked> <span data-i18n="set.gw_low">Low, as the SFD assumes</span></label>
-        <label><input type="radio" name="gw" value="high"> <span data-i18n="set.gw_high">High</span></label>
-      </fieldset>
-      <fieldset>
-        <legend data-i18n="set.case">Cost case used to order options</legend>
-        <label><input type="radio" name="case" value="low"> <span data-i18n="set.case_low">Low</span></label>
-        <label><input type="radio" name="case" value="mid" checked> <span data-i18n="set.case_mid">Mid</span></label>
-        <label><input type="radio" name="case" value="high"> <span data-i18n="set.case_high">High</span></label>
-      </fieldset>
-      <fieldset>
-        <legend data-i18n="set.basis">Household count</legend>
-        <label><input type="radio" name="basis" value="stated" checked> <span data-i18n="set.basis_stated">Stated in the SFD where given</span></label>
-        <label><input type="radio" name="basis" value="hh_size"> <span data-i18n="set.basis_size">Always population ÷ household size</span></label>
-      </fieldset>
-      <label class="field"><span data-i18n="set.hh_size">People per household, where none is stated</span>
-        <input type="number" name="hh" min="1" max="15" step="0.1" inputmode="decimal"></label>
-      <label class="field"><span data-i18n="set.disc">Discount rate, % a year</span>
-        <input type="number" name="disc" min="0.5" max="30" step="0.5" inputmode="decimal"></label>
-    </form>
-    </details>
-  </aside>
-  <div class="main">
-    <div class="tabbar">
-      <nav id="tabs" class="tabs" role="tablist" aria-label="Sections" data-i18n-title="tabs.label"></nav>
-      <button type="button" id="pdf" class="btn btn-pdf" data-i18n="pdf.button" data-i18n-title="pdf.hint">Download PDF</button>
-    </div>
-    <main id="sheet" role="tabpanel"><p class="loading">Loading the 50 towns…</p></main>
-  </div>
-</div>
-<div id="printsheet" aria-hidden="true"></div>
+<main id="app" tabindex="-1"><p class="loading" data-i18n="app.loading">Loading…</p></main>
 <footer class="foot" id="foot"></footer>
-<div id="tip" role="tooltip" hidden></div>
 <script type="module" src="js/ui/app.js"></script>
 </body>
 </html>

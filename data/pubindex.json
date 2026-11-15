@@ -1,0 +1,721 @@
+{
+ "data_version": "0.3",
+ "retrieved": "2026-11-16",
+ "custodian": "SuSanA (Sustainable Sanitation Alliance), SFD Promotion Initiative",
+ "source": "SFD portal, 'SFDs worldwide' list",
+ "url": "https://sfd.susana.org/sfd-worldwide",
+ "note": "A partial copy of the SFD portal's list for South Asia. Only two of its five pages could be read on the retrieval date: names from A to 'Cuttack' and from 'Kalaroa' to 'Natore'. One entry outside those ranges (Sreemangal) was confirmed from the SuSanA library. Names outside the covered ranges are reported as 'not checked', never as 'not listed'. Year is the year of the production date shown on the portal; null where the portal showed none.",
+ "covered": [
+  {
+   "from": "a",
+   "to": "cuttack"
+  },
+  {
+   "from": "kalaroa",
+   "to": "natore"
+  }
+ ],
+ "library_file_pattern": "^3-(\\d{3,5})-7-\\d{9,11}\\.pdf$",
+ "entries": [
+  {
+   "name": "Paikgachha Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Lalitpur Metropolitan City",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Agra",
+   "country": "India",
+   "year": 2015
+  },
+  {
+   "name": "Ahraura",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Aizawl",
+   "country": "India",
+   "year": null
+  },
+  {
+   "name": "Alandi",
+   "country": "India",
+   "year": 2018
+  },
+  {
+   "name": "Araihazar Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Arani Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Aya Nagar",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Badimalika Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Bagerhat Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Bageshwar",
+   "country": "India",
+   "year": 2022
+  },
+  {
+   "name": "Baglung Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bakshi Ka Talab",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Banaripara Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Bandarban Municipality",
+   "country": "Bangladesh",
+   "year": 2021
+  },
+  {
+   "name": "Bandipora",
+   "country": "India",
+   "year": 2021
+  },
+  {
+   "name": "Banepa Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Bangalore",
+   "country": "India",
+   "year": 2019
+  },
+  {
+   "name": "Bansberia",
+   "country": "India",
+   "year": null
+  },
+  {
+   "name": "Banshkhali Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Bardibas Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Barguna Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Barishal City Corporation",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Barwar",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Bauphal Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Beanibazar Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Bedkot Municipality",
+   "country": "Nepal",
+   "year": 2022
+  },
+  {
+   "name": "Belbari",
+   "country": "Nepal",
+   "year": 2025
+  },
+  {
+   "name": "Beni",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bera Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Besishahar Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Betagi Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Bhagalpur",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Bhaktapur Municipality",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Bheemdatt",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Bheri Municipality, Jajarkot District",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bheriganga Municipality",
+   "country": "Nepal",
+   "year": 2024
+  },
+  {
+   "name": "Bhimeshwor Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bhojpur Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bhola Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Bidur Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bijnor",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Bikaner",
+   "country": "India",
+   "year": null
+  },
+  {
+   "name": "Birgunj Metropolitan City",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Birtamod",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Bithoor",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Bodhgaya",
+   "country": "India",
+   "year": 2017
+  },
+  {
+   "name": "Bogra Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Bongaon",
+   "country": "India",
+   "year": 2017
+  },
+  {
+   "name": "Brahmanbaria Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Buddhabhumi Municipality",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Budhanilkantha Municipality",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Buxar",
+   "country": "India",
+   "year": 2017
+  },
+  {
+   "name": "Chakaria Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Chaksu Municipality",
+   "country": "India",
+   "year": 2026
+  },
+  {
+   "name": "Chandpur Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Chandragiri Municipality",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Changunarayan Municipality",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Chapai Nawabganj Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Charghat Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Chattogram City Corporation",
+   "country": "Bangladesh",
+   "year": 2018
+  },
+  {
+   "name": "Chauddagram Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Chennai",
+   "country": "India",
+   "year": 2019
+  },
+  {
+   "name": "Chhatak Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Chhayanath Rara",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Chuadanga Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Chunar",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Coimbatore",
+   "country": "India",
+   "year": 2019
+  },
+  {
+   "name": "Cox's Bazar",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Cumilla City Corporation",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Cuttack",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Kalaroa Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Kaliakair Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Kalihati Municipality",
+   "country": "Bangladesh",
+   "year": 2023
+  },
+  {
+   "name": "Kalkini Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Kalpetta",
+   "country": "India",
+   "year": 2019
+  },
+  {
+   "name": "Kalyanpur-Panki",
+   "country": "India",
+   "year": 2021
+  },
+  {
+   "name": "Kamalamai Municipality",
+   "country": "Nepal",
+   "year": 2024
+  },
+  {
+   "name": "Kamalganj Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Kandahar",
+   "country": "Afghanistan",
+   "year": 2018
+  },
+  {
+   "name": "Kanchipuram",
+   "country": "India",
+   "year": 2021
+  },
+  {
+   "name": "Kannur",
+   "country": "India",
+   "year": 2019
+  },
+  {
+   "name": "Kanpur",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Karimganj Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Kathmandu Metropolitan City",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Kathmandu Valley",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Katihar",
+   "country": "India",
+   "year": 2017
+  },
+  {
+   "name": "Khagrachari Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Khandbari",
+   "country": "Nepal",
+   "year": 2026
+  },
+  {
+   "name": "Khordha",
+   "country": "India",
+   "year": 2026
+  },
+  {
+   "name": "Khulna",
+   "country": "Bangladesh",
+   "year": null
+  },
+  {
+   "name": "Kirtipur Municipality",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Kishoreganj Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Kochi",
+   "country": "India",
+   "year": null
+  },
+  {
+   "name": "Kolhabi Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Kunduz",
+   "country": "Afghanistan",
+   "year": 2018
+  },
+  {
+   "name": "Kurigram Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Kushtia Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Lahan",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Lakhimpur",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Laksham Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Lakshmipur Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Lalmonirhat Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Lama Municipality",
+   "country": "Bangladesh",
+   "year": 2021
+  },
+  {
+   "name": "Lamahi",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Lucknow",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Madaripur Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Madhyapur Thimi Municipality",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Magura Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Mahakali Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Mahalaxmi Municipality",
+   "country": "Nepal",
+   "year": 2019
+  },
+  {
+   "name": "Malangwa Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Mandapeta",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Manikganj Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Manohardi Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Mazar",
+   "country": "Afghanistan",
+   "year": 2018
+  },
+  {
+   "name": "Meherpur Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Mirchaiya Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Mirzapur Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Mithila Bihari Municipality",
+   "country": "Nepal",
+   "year": 2023
+  },
+  {
+   "name": "Moulvibazar Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Muksudpur Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Muktagacha Municipality",
+   "country": "Bangladesh",
+   "year": 2026
+  },
+  {
+   "name": "Munshiganj Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Muzaffarpur",
+   "country": "India",
+   "year": 2018
+  },
+  {
+   "name": "Mymensingh City Corporation",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Mysuru",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Nabiganj Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Nagarjun Municipality",
+   "country": "Nepal",
+   "year": 2020
+  },
+  {
+   "name": "Nagarkanda Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Nageshwari Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  },
+  {
+   "name": "Nanded",
+   "country": "India",
+   "year": 2021
+  },
+  {
+   "name": "Naogaon Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Narail Municipality",
+   "country": "Bangladesh",
+   "year": 2024
+  },
+  {
+   "name": "Narayanganj City Corporation",
+   "country": "Bangladesh",
+   "year": 2021
+  },
+  {
+   "name": "Narsingdi Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Nashik",
+   "country": "India",
+   "year": 2020
+  },
+  {
+   "name": "Natore Municipality",
+   "country": "Bangladesh",
+   "year": 2022
+  },
+  {
+   "name": "Sreemangal Municipality",
+   "country": "Bangladesh",
+   "year": 2025
+  }
+ ]
+}

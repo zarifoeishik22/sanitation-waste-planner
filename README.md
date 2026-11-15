@@ -1,95 +1,61 @@
-# sanitation-waste-planner
+# Sanitation and waste planner (draft v0.3)
 
-A rule-based planning tool for Bangladeshi municipalities (paurashavas). It reads a town's excreta flow diagram (SFD) and waste flow diagram (WFD), shows where excreta and plastic end up and which loss is largest, and turns that into an ordered plan in plain terms. Every figure traces to a rule and a cost row you can open and change. It runs in the browser; nothing you enter or upload leaves your device.
+Drop a town's **SFD** (excreta flow diagram) report, its **WFD** (waste flow diagram) portal page, or both. The page reads them
+in the browser, shows where excreta and escaped plastic end up together, and sizes what to build.
 
-**Status: draft v0.2. Costs are placeholders that test the calculation. Do not quote any taka figure from this tool.** Draft for review; not an official publication of DPHE, WaterAid or GIZ.
+Live: https://zarifoeishik22.github.io/sanitation-waste-planner/
 
-## What v0.2 does
+Draft tool. The decision rules await expert review. Unit rates are entered by the user. Use it to frame a proposal, not to fix a budget.
 
-- **Overview.** One statement and one picture each for excreta and solid waste, and the first three things to do.
-- **Sanitation.** Where the excreta goes (flows from toilet and tank types to outcomes), the largest loss and what it means, who is on which system, containment options ordered by yearly cost per person newly contained, and emptying, transport and treatment as one package. Emptying is never ranked alone.
-- **Solid waste.** Waste produced and collected, where plastic escapes by stage, and where it ends up. Options are listed by stage and not costed.
-- **Plan.** An ordered list of decisions for sanitation and solid waste. A "what if" for each: move households to the cheapest fix, treat a share of emptied sludge, raise collection, control the dumpsite, or set a target for safely managed excreta and see what it takes.
-- **Costs.** Every unit cost can be changed in the page. Changed figures are marked as the user's own, on screen and in the saved run file.
-- **Compare.** The town among the 50 surveyed towns, on sanitation and solid waste.
-- **Your town.** Type a town in, or read a published report in the browser: an SFD Lite report (DPHE CWIS-FSM Support Cell format) or a WFD Data Portal page saved as PDF. The tool fills a form, shows what it could not find, and waits for you to confirm.
-- **Sources.** National context figures with source, year and scope; what the draft cannot tell you; how the tool works.
-- **Download PDF.** A one-page sheet for the town. It carries no taka totals while costs are placeholders.
-- Works offline after one visit.
-- Holds 50 municipalities (SFD Lite, level 0.5, status Draft, 2023, and their WFDs) as built-in examples, with a groundwater switch: all 50 SFDs assume low groundwater risk.
+## What it does
 
-## What v0.2 cannot do
+| Step | What happens |
+|---|---|
+| Upload | PDF text is read in the browser with a vendored copy of pdf.js. Nothing is uploaded. SFD alone, WFD alone or both. |
+| Check | Shows what was read in plain words and asks only for what the report leaves out. Nothing is filled in silently. |
+| Verdict | The town's main failure in one line for each system, up to three flags, and three actions in order. |
+| The drain | One schematic of open drains, water and open ground, which receive both excreta and plastic. Controls switch interventions on and the picture, the loads and the safely managed share update. |
+| Sizing bridge | For each intervention the town's flows call for: deficit, sizing rule, units, your unit rates, investment. |
+| Evidence | Where the figures come from, every flag, the town among 50 Bangladeshi municipalities, and what the tool cannot tell you. |
 
-- Cost treatment. The treatment plant, emptying vehicles and land have no cost data or sizing rule yet, and in 49 of the 50 towns sludge that is emptied and not treated is the largest loss.
-- Cost anything in solid waste, or estimate municipal cost. Every costed option so far is paid by households.
-- Give real costs. Every cost row is a placeholder with no source.
-- Read the SFD matrix or graphic in a report: they are images. Shares come from the report's prose, which can leave systems out; the tool shows the shortfall and asks.
-- Re-run a WFD. The solid-waste "what if" scales the published result.
-- Turn a town's flows into deaths, illness or economic return. National and global figures are shown as context and labelled as such.
-- Check conditions such as plot space, road access or flooding for individual households.
+## What runs where
 
-## How it is built
+| In the browser | Bundled, dated snapshot | Not possible on a static site |
+|---|---|---|
+| PDF text reading, all calculations, the drain picture, PDF output through the browser's print | A partial copy of SuSanA's SFD portal list (`data/pubindex.json`), sizing rules with sources (`data/sizing.json`), national context figures (`data/benchmarks.json`), 50 Bangladeshi municipalities with both an SFD and a WFD | A live check against SuSanA or the GIZ WFD portal, reading scanned PDFs, reading the SFD matrix where it is an image |
 
-Plain HTML, CSS and JavaScript modules. No build step, no backend, no analytics, no cookies, no requests to other sites (enforced by a Content-Security-Policy).
+## Honest limits
 
-```
-index.html, css/        the page
-js/engine/              the calculation: pure functions, no page access (cost.js, sfd.js, plan.js)
-js/ui/                  rendering and page wiring
-data/                   rules.json, costs.json, params.json   generated from the workbook
-                        towns.json, sfd.json, wfd.json        town-level aggregates
-                        strings.en.json                       all page text
-data/source/            the cost and rule workbook (edit this, not the JSON)
-scripts/                build_data.py, reference_engine.py, check_repo.py, check_workbook.py, run_all_towns.mjs
-tests/                  node --test
-vendor/fonts/           Hind Siliguri (SIL Open Font License)
-```
+- **"Listed on SuSanA" is a name match** against a copy of the SFD portal list taken on the date in `data/pubindex.json`. It does not prove a file is the published one. The copy covers names from A to "Cuttack" and from "Kalaroa" to "Natore"; other names are reported as "not checked".
+- **No WFD index is bundled.** A WFD is labelled by where its figures came from: a GIZ portal page, the project dataset, or typed in.
+- **The built-in WFD figures come from the project's 50-municipality dataset, not the GIZ portal.** For Kaliakair the two differ (812 against 1,158 tonnes of escaped plastic a year); the page shows both.
+- **Money is never added up from draft figures.** The cost list in `data/costs.json` is a draft and appears only as a hint in each rate box. Totals use rates the user enters, or cost items marked as reviewed.
+- **Sizing rules marked "assumption" have no source behind them.** Rules marked "cited" name their source. All can be changed in the page.
+- **No health or flood estimate is made for a town.** No town-level model supports one.
+- **The report readers are tested on one SFD Lite report and one WFD portal page.** Other layouts may fall back to typing.
+- **Plastic after a change is scaled, not modelled.** The WFD tool is not re-run.
+- **JMP and GLAAS:** one national JMP figure (Bangladesh) is bundled as context. Urban figures by country and GLAAS figures could not be retrieved and are not used.
 
-### Changing costs or rules
-
-1. Edit `data/source/P7_Cost_and_Rules_Template_v0.2.xlsx` (yellow cells). Set a row's status to `REAL` once it has a source.
-2. Run `python scripts/build_data.py`.
-3. Run the checks below and commit both the workbook and the JSON.
-
-### Checks
+## Run it locally
 
 ```
-python scripts/check_repo.py          # nothing forbidden is in the repository
-python scripts/build_data.py --check  # JSON matches the workbook
-python scripts/check_workbook.py      # the workbook's own test sheet matches the engine
-node --test tests/*.test.mjs          # engine, independent Python reference, parsers, every tab of the page, offline list
+python3 -m http.server 8000     # then open http://localhost:8000
+node --test tests/*.test.mjs    # engine, reference and page tests
 ```
 
-The JavaScript engine is compared with an independent Python implementation on all 50 towns, both groundwater settings, both household bases and the three cost cases. The what-if, decision and solid-waste modules are new in v0.2 and are tested in JavaScript only; they are not yet in the Python reference.
+No build step, no backend, no tracking. The page allows no other origin (Content-Security-Policy `default-src 'self'`) and stores nothing in the browser.
 
-To test the report parsers against the PDFs themselves, set `SFD_PDF` and `WFD_PDF` to their paths. The WFD portal report is copyright GIZ and is never committed; `tests/fixtures/` holds text fixtures only.
+## Layout
 
-### Running it locally
+| Path | Contents |
+|---|---|
+| `js/engine/` | Pure functions: SFD outcome and plan, what-if, WFD view, drain loads, sizing bridge, flags, verdict, listing check |
+| `js/parsers/` | SFD Lite report and WFD portal page readers |
+| `js/ui/` | Views as HTML strings, the drain picture, page wiring |
+| `data/` | Generated data files and reference snapshots; `data/source/` holds the cost and rules workbook |
+| `scripts/` | Data build, repository guard, Python reference engine |
+| `tests/` | Node tests, including a Python cross-check of the plan engine |
 
-```
-python -m http.server 8000
-```
+## Licence
 
-then open `http://localhost:8000`. Opening `index.html` straight from disk does not work, because browsers block module and data loading from `file://`.
-
-## Method in brief
-
-- **Contained** follows the SFD definition. In the 50 SFDs "safely managed" means contained and not emptied, because no town has a working treatment step.
-- **Outcome of a contained system**, as a share of population: `safe = pop × (1 − f × e) + pop × f × e × delivered × treated`, where `e` is the share emptied and `f` the SFD's sludge factor for septic tanks (1 elsewhere). This reproduces every contained system in the 50 SFDs.
-- **An option** moves the households of one system to a result system. People newly contained = people on the system, if it did not contain and the result system does. "Safely managed" after the option assumes they empty as today's users of the result system in that town do.
-- **Annual cost** = one-off cost × capital recovery factor (discount rate, lifespan) + O&M share; per-service items = cost × uses per year.
-- **Households** = the number stated in the SFD report where the tool has it, otherwise population ÷ household size.
-
-Option rules are a first draft awaiting expert review.
-
-## Data
-
-- Town data: 50-municipality SFD and WFD study, Bangladesh, 2023. SFDs prepared by the CWIS-FSM Support Cell, DPHE. Only town-level aggregates are published here.
-- This repository never holds household records, coordinates, personal identifiers or WFD Data Portal reports (copyright GIZ). `scripts/check_repo.py` enforces that on every push.
-
-## Licence and credit
-
-- Code: MIT (`LICENSE`).
-- Rules, costs and data files: CC BY 4.0 (`LICENSE-data`). Cost rows with status `REAL` that come from WaterAid Bangladesh bills of quantities are credited to WaterAid Bangladesh; v0.1 has none.
-- Third-party material: `NOTICE`.
-- How to cite: `CITATION.cff`. Please do not cite figures from a draft.
+Code: MIT. Data: see `LICENSE-data` and `NOTICE`.

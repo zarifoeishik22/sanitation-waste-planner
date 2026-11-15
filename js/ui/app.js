@@ -1,182 +1,58 @@
-// Page wiring: load data, keep the page state, run the engine, put the active tab on the page.
-import { paramMap } from '../engine/cost.js';
-import { makeT, renderFacts, esc } from './render.js';
-import { buildContext, buildOwn, defaultState, reportBasis } from './context.js';
-import { TABS, WFD_FIELDS, renderTab, renderPrint, whatIfSanOut, waysOut, whatIfWasteOut, costTag, ownTotal, banners } from './views.js';
+// Page wiring: load data, keep the page state, read dropped reports, run the engines, put the current view on the page.
+import { systemIndex } from '../engine/sfd.js';
+import { checkListing } from '../engine/pubindex.js';
+import { makeT, esc } from './util.js';
+import { buildContext, buildOwn, defaultState, reportBasis, WFD_FIELDS, COUNTRIES } from './context.js';
+import { renderLanding, renderCheck, renderWork, shareTotal, sceneBlock, receiversBlock, readoutBlock, leversBlock, bridgeBlock, totalsBlock, lineTotals, verdictSection } from './views.js';
 
 const $ = (sel) => document.querySelector(sel);
-const FILES = ['towns', 'sfd', 'wfd', 'rules', 'costs', 'params', 'benchmarks', 'strings.en'];
-const COST_FIELDS = ['cost_low', 'cost_high', 'lifespan_years', 'uses_per_year'];
+const FILES = ['towns', 'sfd', 'wfd', 'rules', 'costs', 'params', 'benchmarks', 'sizing', 'pubindex', 'strings.en'];
 const MAX_PDF = 30 * 1024 * 1024;
+const r2 = (v) => String(Math.round(v * 100) / 100);
 
 async function loadAll() {
   const res = await Promise.all(FILES.map((n) => fetch(`data/${n}.json`).then((r) => { if (!r.ok) throw new Error(n); return r.json(); })));
   return Object.fromEntries(FILES.map((n, i) => [n.replace('.en', ''), res[i]]));
 }
 
-function readHash() {
-  const out = {};
-  for (const [k, v] of new URLSearchParams(location.hash.slice(1))) out[k] = v;
-  return out;
-}
-
-/** Sizes that depend on data arrive as data-* attributes; the CSP forbids inline styles, so set them through the CSSOM. */
-function applySizes(root) {
-  root.querySelectorAll('[data-grow]').forEach((el) => { el.style.flexGrow = el.dataset.grow; });
-  root.querySelectorAll('[data-w]').forEach((el) => { el.style.width = `${el.dataset.w}%`; });
-  root.querySelectorAll('[data-top]').forEach((el) => { el.style.top = `${el.dataset.top}%`; });
-}
-
 function start(d) {
   const t = makeT(d.strings);
-  const base = paramMap(d.params);
-  const state = defaultState(d);
-  const form = $('#settings');
-  const select = $('#town');
-  const sheet = $('#sheet');
-  const tabs = $('#tabs');
+  const sysIdx = systemIndex(d.rules);
+  const app = $('#app');
   const today = new Date().toISOString().slice(0, 10);
-  let ctx;
+  let state = defaultState();
+  let ctx = null;
 
   document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
-  tabs.innerHTML = TABS.map((k) => `<button type="button" role="tab" id="tab-${k}" data-tab="${k}" aria-controls="sheet">${esc(t(`tab.${k}`))}</button>`).join('');
-  if (window.matchMedia('(min-width: 901px)').matches) $('#settings-wrap').open = true;
+  $('#foot').innerHTML = `<p>${esc(t('land.private'))}</p><p>Draft v0.3. Rules v${esc(d.rules.data_version)}, sizing rules v${esc(d.sizing.data_version)}, SuSanA list copied ${esc(d.pubindex.retrieved)}. Code: MIT licence. <a href="https://github.com/zarifoeishik22/sanitation-waste-planner" rel="noopener noreferrer">Source</a></p>`;
 
-  function fillSelect() {
-    const sorted = d.towns.towns.slice().sort((a, b) => a.name.localeCompare(b.name));
-    select.innerHTML = (state.own ? `<option value="own">${esc(t('town.own', { name: state.own.town.name }))}</option>` : '')
-      + sorted.map((x) => `<option value="${x.id}">${esc(x.name)}${x.district ? `, ${esc(x.district)}` : ''}</option>`).join('');
-    select.value = state.townId;
+  const named = d.towns.towns.find((x) => x.name.toLowerCase() === new URLSearchParams(location.hash.slice(1)).get('town')?.toLowerCase());
+  if (named) { state.townId = String(named.id); state.view = 'work'; }
+
+  function compute() { ctx = buildContext(d, state, t, today); }
+
+  function render(focusTop = false) {
+    if (state.view === 'work') { compute(); app.innerHTML = renderWork(ctx); document.title = `${ctx.town.name}: ${t('app.title')}`; }
+    else if (state.view === 'check') { app.innerHTML = renderCheck(state, sysIdx, t); document.title = t('app.title'); }
+    else { app.innerHTML = renderLanding(state, d, t); document.title = t('app.title'); }
+    document.body.dataset.view = state.view;
+    const hash = state.view === 'work' && state.townId !== 'own' ? `#town=${encodeURIComponent(ctx.town.name)}` : ' ';
+    history.replaceState(null, '', hash === ' ' ? location.pathname + location.search : hash);
+    if (focusTop) { window.scrollTo({ top: 0, behavior: 'instant' }); app.focus({ preventScroll: true }); }
   }
 
-  // initial state: URL hash, then the workbook defaults
-  const h = readHash();
-  const named = d.towns.towns.find((x) => x.name.toLowerCase() === String(h.town || '').toLowerCase());
-  if (named) state.townId = String(named.id);
-  if (TABS.includes(h.tab)) state.tab = h.tab;
-  if (h.gw === 'high') state.gw = 'high';
-  if (['low', 'mid', 'high'].includes(h.case)) state.case = h.case;
-  if (h.basis === 'hh_size' || h.basis === 'stated') state.basis = h.basis;
-  if (Number(h.hh) > 0) state.hh = Number(h.hh);
-  if (Number(h.disc) > 0) state.disc = Number(h.disc);
-  const pc = (v) => Math.min(100, Math.max(0, Math.round(Number(v) || 0)));
-  state.uptake = pc(h.u); state.treat = pc(h.tr); state.wctl = pc(h.wk);
-  if (h.wc !== undefined && h.wc !== '') state.wcol = pc(h.wc);
-  if (Number(h.tg) > 0 && Number(h.tg) <= 100) state.target = String(Number(h.tg));
-  form.gw.value = state.gw; form.case.value = state.case; form.basis.value = state.basis; form.hh.value = state.hh; form.disc.value = state.disc;
-  fillSelect();
-
-  function writeHash() {
-    const q = new URLSearchParams({ town: ctx.town.typed ? 'own' : ctx.town.name, tab: state.tab, gw: state.gw, case: state.case, basis: state.basis, hh: String(ctx.hh), disc: String(+(ctx.disc * 100).toFixed(2)) });
-    if (state.uptake) q.set('u', state.uptake);
-    if (state.treat) q.set('tr', state.treat);
-    if (state.target) q.set('tg', state.target);
-    if (state.wcol !== null) q.set('wc', state.wcol);
-    if (state.wctl) q.set('wk', state.wctl);
-    history.replaceState(null, '', `#${q}`);
+  /** After a lever moves: redraw what depends on it and leave the controls alone, so a drag is not interrupted. */
+  function refresh({ levers = false, verdict = false } = {}) {
+    compute();
+    $('#scene').innerHTML = sceneBlock(ctx);
+    $('#receivers').innerHTML = receiversBlock(ctx);
+    if (levers) { const box = $('#levers'); box.innerHTML = `${leversBlock(ctx)}<div id="readout">${readoutBlock(ctx)}</div>`; } else $('#readout').innerHTML = readoutBlock(ctx);
+    $('#bridge').innerHTML = bridgeBlock(ctx);
+    $('#totals').innerHTML = totalsBlock(ctx);
+    if (verdict) $('#verdict').outerHTML = verdictSection(ctx);
   }
 
-  function drawPrint() { $('#printsheet').innerHTML = renderPrint(ctx); applySizes($('#printsheet')); }
-
-  function draw() {
-    state.gw = form.gw.value; state.case = form.case.value; state.basis = form.basis.value; state.hh = form.hh.value; state.disc = form.disc.value;
-    ctx = buildContext(d, state, t, today);
-    $('#facts').innerHTML = renderFacts(ctx.r, ctx.town, t);
-    sheet.innerHTML = renderTab(ctx);
-    applySizes(sheet);
-    tabs.querySelectorAll('[data-tab]').forEach((b) => { const on = b.dataset.tab === state.tab; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
-    sheet.setAttribute('aria-labelledby', `tab-${state.tab}`);
-    drawPrint();
-    document.title = `${ctx.town.name}: ${t('app.title')} (draft)`;
-    writeHash();
-  }
-
-  function go(tab) { state.tab = tab; draw(); $('.tabbar').scrollIntoView({ block: 'start' }); }
-
-  function setTown(id) {
-    state.townId = String(id); state.wcol = null; // the collection lever starts at the new town's own level
-    select.value = state.townId;
-    draw();
-  }
-
-  /* ----- what-if levers ----- */
-  function lever(el) {
-    const name = el.dataset.lever;
-    if (name === 'target') state.target = el.value;
-    else { state[name] = Number(el.value); const out = sheet.querySelector(`output[data-for="${name}"]`); if (out) out.textContent = `${el.value}%`; }
-    ctx = buildContext(d, state, t, today);
-    const put = (id, html) => { const box = $(id); if (box) { box.innerHTML = html; applySizes(box); } };
-    if (name === 'wcol' || name === 'wctl') put('#wi-waste-out', whatIfWasteOut(ctx));
-    else { put('#wi-san-out', whatIfSanOut(ctx)); put('#ways-out', waysOut(ctx)); }
-    drawPrint(); writeHash();
-  }
-
-  /* ----- costs ----- */
-  function refreshBanners() { const b = sheet.querySelector('[data-banners]'); if (b) b.outerHTML = banners(ctx); }
-
-  function costEdit(el) {
-    const id = el.dataset.cost; const field = el.dataset.field;
-    const item = d.costs.items.find((i) => i.id === id);
-    const v = el.value.trim() === '' ? null : Number(el.value);
-    if (v !== null && !(Number.isFinite(v) && v >= 0)) { el.value = ''; return; }
-    const o = { ...(state.costOverrides[id] || {}) };
-    if (v === item[field] || (v === null && item[field] === null)) delete o[field]; else o[field] = v;
-    if (Object.keys(o).length) state.costOverrides[id] = o; else delete state.costOverrides[id];
-    ctx = buildContext(d, state, t, today);
-    const tag = sheet.querySelector(`tr[data-row="${id}"] .cost-tag`);
-    if (tag) tag.outerHTML = costTag(item, Boolean(state.costOverrides[id]), t);
-    refreshBanners(); drawPrint();
-  }
-
-  function saveRun() {
-    const run = { tool: 'sanitation-waste-planner', version: '0.2', exported: new Date().toISOString(),
-      data_versions: { rules: d.rules.data_version, costs: d.costs.data_version, towns: d.sfd.data_version, benchmarks: d.benchmarks.data_version },
-      town: ctx.town.name, settings: { gw: state.gw, case: state.case, basis: state.basis, hh: ctx.hh, disc: +(ctx.disc * 100).toFixed(2) },
-      what_if: { uptake: state.uptake, treat: state.treat, target: state.target, collection: state.wcol, controlled: state.wctl },
-      cost_overrides: state.costOverrides, own_form: state.own ? state.ownForm : null, up_snap: state.own ? state.upSnap : null };
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(run, null, 1)], { type: 'application/json' }));
-    a.download = `planner-run-${ctx.town.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${today}.json`;
-    document.body.append(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  }
-
-  /** A saved snapshot of what the PDFs filled in, kept only if it has the expected shape. */
-  function cleanSnap(x) {
-    const out = {};
-    for (const kind of ['sfd', 'wfd']) {
-      const o = x && typeof x === 'object' ? x[kind] : null;
-      if (o && typeof o === 'object') out[kind] = Object.fromEntries(Object.entries(o).filter(([k, v]) => /^[a-z_0-9A-Z]{1,40}$/.test(k) && typeof v === 'string').map(([k, v]) => [k, v.slice(0, 60)]));
-    }
-    return out;
-  }
-
-  async function loadRun(file) {
-    try {
-      const run = JSON.parse(await file.text());
-      if (!run || run.tool !== 'sanitation-waste-planner' || typeof run.cost_overrides !== 'object') throw new Error('not a run file');
-      const known = new Set(d.costs.items.map((i) => i.id));
-      const clean = {};
-      for (const [id, o] of Object.entries(run.cost_overrides || {})) {
-        if (!known.has(id) || !o || typeof o !== 'object') continue;
-        const c = {};
-        for (const f of COST_FIELDS) if (f in o && (o[f] === null || (typeof o[f] === 'number' && Number.isFinite(o[f]) && o[f] >= 0))) c[f] = o[f];
-        if (Object.keys(c).length) clean[id] = c;
-      }
-      state.costOverrides = clean;
-      if (run.own_form && typeof run.own_form === 'object') {
-        state.ownForm = Object.fromEntries(Object.entries(run.own_form).filter(([k, v]) => /^[a-z_0-9A-Z]{1,40}$/.test(k) && ['string', 'number'].includes(typeof v)).map(([k, v]) => [k, String(v).slice(0, 60)]));
-        state.upSnap = cleanSnap(run.up_snap);
-      }
-      state.costMsg = t('costs.loaded', { n: Object.keys(clean).length });
-    } catch (err) {
-      state.costMsg = t('costs.bad_file');
-    }
-    draw();
-  }
-
-  /* ----- your town ----- */
+  /* ----- reading reports ----- */
   async function readPdf(file) {
     const pdfjs = await import('../../vendor/pdfjs/pdf.min.mjs');
     pdfjs.GlobalWorkerOptions.workerSrc = new URL('../../vendor/pdfjs/pdf.worker.min.mjs', import.meta.url).href;
@@ -185,128 +61,193 @@ function start(d) {
     return pdfToPages(doc);
   }
 
-  const r2 = (v) => String(Math.round(v * 100) / 100);
-
-  async function upload(kind, file) {
-    const say = (list) => { state.ownMsgs = state.ownMsgs.filter((m) => m.src && m.src !== kind).concat(list.map((m) => ({ ...m, src: kind }))); draw(); };
-    if (file.size > MAX_PDF) return say([{ kind: 'err', key: 'up.too_big' }]);
-    const box = $('#own-msgs'); if (box) box.innerHTML = `<ul class="msgs"><li>${esc(t('up.reading', { name: file.name }))}</li></ul>`;
-    let pages;
-    try { pages = await readPdf(file); } catch (err) { console.error(err); return say([{ kind: 'err', key: 'up.failed' }]); }
-    const f = state.ownForm; const msgs = [];
-    if (kind === 'sfd') {
-      const { parseSfdReport } = await import('../parsers/sfd-report.js');
-      const p = parseSfdReport(pages);
-      if (!p.is_sfd_report || !p.systems.length) return say([{ kind: 'err', key: 'up.not_sfd' }]);
-      for (const k of Object.keys(f)) if (k.startsWith('share_') || k.startsWith('emptied_')) delete f[k];
-      state.upSnap.sfd = null;
-      if (p.town) f.name = p.town;
-      if (p.population) f.population = String(p.population);
-      f.households = p.households ? String(p.households) : '';
-      f.sludge_pct = p.sludge_factor === null ? '' : r2(p.sludge_factor * 100);
-      const blank = [];
-      for (const s of p.systems) {
-        f[`share_${s.code}`] = r2(s.share * 100);
-        if (s.emptied !== null) f[`emptied_${s.code}`] = r2(s.emptied * 100);
-        else if (ctx.sysIdx[s.code] && ctx.sysIdx[s.code].group !== 'direct') blank.push(s.code);
-      }
-      state.upSnap.sfd = Object.fromEntries(Object.entries(f).filter(([k]) => /^(share_|emptied_)/.test(k) || ['population', 'households', 'sludge_pct'].includes(k)));
-      msgs.push({ kind: 'ok', key: 'up.sfd_read', vars: { town: p.town || '?', n: p.systems.length, population: p.population ? p.population.toLocaleString('en-GB') : '?' } });
-      if (p.share_sum < 0.99 || p.share_sum > 1.01) msgs.push({ kind: 'warn', key: 'up.sfd_short', vars: { sum: `${r2(p.share_sum * 100)}%`, gap: `${r2(Math.abs(1 - p.share_sum) * 100)}%` } });
-      if (p.conflicts.length) msgs.push({ kind: 'warn', key: 'up.sfd_conflict', vars: { codes: p.conflicts.map((c) => c.code).join(', ') } });
-      if (blank.length) msgs.push({ kind: 'warn', key: 'up.sfd_no_emptied', vars: { codes: blank.join(', ') } });
-      if (p.sludge_factor === null) msgs.push({ kind: 'warn', key: 'up.sfd_no_factor' });
-      if (p.stated_safe !== null) msgs.push({ kind: 'ok', key: 'up.sfd_safe', vars: { safe: `${r2(p.stated_safe * 100)}%` } });
-    } else {
-      const { parseWfdPortal } = await import('../parsers/wfd-portal.js');
-      const p = parseWfdPortal(pages);
-      if (!p.is_wfd_portal || p.plastic_unmanaged_t === null) return say([{ kind: 'err', key: 'up.not_wfd' }]);
-      const map = { msw_t_day: p.msw_t_day, collected_pct: p.collected_share === null ? null : p.collected_share * 100, plastic_generated_t: p.plastic_generated_t, plastic_unmanaged_t: p.plastic_unmanaged_t,
-        stage_uncollected_t: p.stage_uncollected_t, stage_collection_t: p.stage_collection_t, stage_sorting_t: p.stage_sorting_t, stage_transport_t: p.stage_transport_t, stage_disposal_t: p.stage_disposal_t,
-        fate_land_t: p.fate_land_t, fate_water_t: p.fate_water_t, fate_burnt_t: p.fate_burnt_t, fate_drains_t: p.fate_drains_t, organic_pct: p.organic_share === null ? null : p.organic_share * 100 };
-      const missing = [];
-      for (const k of WFD_FIELDS) { if (map[k] === null || map[k] === undefined) { f[k] = ''; missing.push(t(`own.w.${k}`)); } else f[k] = r2(map[k]); }
-      if (!f.name && p.town) f.name = p.town;
-      if (!f.population && p.population) f.population = String(p.population);
-      const version = p.model_version ? t('up.wfd_version', { v: p.model_version, model: p.burning_model || '?' }) : '';
-      state.upSnap.wfd = Object.fromEntries(WFD_FIELDS.map((k) => [k, f[k]]));
-      msgs.push({ kind: 'ok', key: 'up.wfd_read', vars: { town: p.town || '?', tonnes: p.plastic_unmanaged_t.toLocaleString('en-GB'), version } });
-      if (p.checks.stage_ok === true) msgs.push({ kind: 'ok', key: 'up.wfd_check_ok', vars: { sum: p.checks.stage_sum.toLocaleString('en-GB') } });
-      if (p.checks.stage_ok === false) msgs.push({ kind: 'warn', key: 'up.wfd_check_bad', vars: { sum: p.checks.stage_sum, total: p.plastic_unmanaged_t } });
-      if (missing.length) msgs.push({ kind: 'warn', key: 'up.wfd_missing', vars: { fields: missing.join('; ') } });
+  function fillSfd(p, fileName, pages) {
+    const f = state.ownForm;
+    for (const k of Object.keys(f)) if (k.startsWith('share_') || k.startsWith('emptied_')) delete f[k];
+    if (p.town) f.name = p.town;
+    if (p.population) f.population = String(p.population);
+    f.households = p.households ? String(p.households) : '';
+    f.sludge_pct = p.sludge_factor === null ? '' : r2(p.sludge_factor * 100);
+    for (const s of p.systems) {
+      if (!sysIdx[s.code]) continue;
+      f[`share_${s.code}`] = r2(s.share * 100);
+      if (s.emptied !== null) f[`emptied_${s.code}`] = r2(s.emptied * 100);
     }
-    return say(msgs);
+    state.upSnap.sfd = Object.fromEntries(Object.entries(f).filter(([k]) => /^(share_|emptied_)/.test(k) || ['population', 'households', 'sludge_pct'].includes(k)));
+    state.upMeta.sfd = { file: fileName, stated_safe: p.stated_safe, share_sum: p.share_sum, date: p.date };
+    if (!state.country) { const head = pages.slice(0, 2).join(' '); state.country = COUNTRIES.find((c) => head.includes(c)) || ''; }
+    const listing = checkListing(p.town || '', state.country || null, d.pubindex, fileName);
+    return [{ kind: 'ok', key: 'read.sfd', vars: { town: p.town || '?', n: p.systems.length, sum: `${r2(p.share_sum * 100)}%` } },
+      { kind: listing.status === 'listed' ? 'ok' : 'note', key: `read.${listing.status}`, vars: { year: listing.entry && listing.entry.year ? listing.entry.year : t('badge.no_year') } }];
   }
 
-  function useOwn() {
-    const res = buildOwn(state.ownForm, ctx.sysIdx);
-    if (!res.own) { state.ownMsgs = res.errors.map((e) => ({ kind: 'err', ...e })); draw(); $('#own-msgs').scrollIntoView({ block: 'center' }); return; }
-    res.own.town.basis = reportBasis(state.ownForm, state.upSnap, Boolean(res.own.wfdTown));
-    state.own = res.own; state.ownMsgs = res.warnings.map((e) => ({ kind: 'warn', ...e }));
-    state.townId = 'own'; state.wcol = null; state.tab = 'overview';
-    fillSelect(); draw(); $('.tabbar').scrollIntoView({ block: 'start' });
+  function fillWfd(p) {
+    const f = state.ownForm;
+    const map = { msw_t_day: p.msw_t_day, collected_pct: p.collected_share === null ? null : p.collected_share * 100, plastic_generated_t: p.plastic_generated_t, plastic_unmanaged_t: p.plastic_unmanaged_t,
+      stage_uncollected_t: p.stage_uncollected_t, stage_collection_t: p.stage_collection_t, stage_sorting_t: p.stage_sorting_t, stage_transport_t: p.stage_transport_t, stage_disposal_t: p.stage_disposal_t,
+      fate_land_t: p.fate_land_t, fate_water_t: p.fate_water_t, fate_burnt_t: p.fate_burnt_t, fate_drains_t: p.fate_drains_t, organic_pct: p.organic_share === null ? null : p.organic_share * 100 };
+    for (const k of WFD_FIELDS) f[k] = map[k] === null || map[k] === undefined ? '' : r2(map[k]);
+    if (!f.name && p.town) f.name = p.town;
+    if (!f.population && p.population) f.population = String(p.population);
+    state.upSnap.wfd = Object.fromEntries(WFD_FIELDS.map((k) => [k, f[k]]));
+    state.upMeta.wfd = { portal: true, version: p.model_version, model: p.burning_model };
+    return [{ kind: 'ok', key: 'read.wfd', vars: { town: p.town || '?', tonnes: p.plastic_unmanaged_t.toLocaleString('en-GB') } }];
+  }
+
+  async function handleFiles(list) {
+    const files = [...list].slice(0, 4);
+    if (!files.length) return;
+    state.reading = files.map((f) => ({ kind: 'busy', key: 'read.start', vars: { name: f.name } }));
+    state.view = state.view === 'check' ? 'check' : 'landing';
+    if (state.view === 'landing') render();
+    const out = [];
+    let good = 0;
+    for (const file of files) {
+      const name = file.name;
+      if (file.size > MAX_PDF) { out.push({ kind: 'err', key: 'read.too_big', vars: { name } }); continue; }
+      let pages;
+      try { pages = await readPdf(file); } catch (err) { console.error(err); out.push({ kind: 'err', key: 'read.failed', vars: { name } }); continue; }
+      if (!pages.join('').trim()) { out.push({ kind: 'err', key: 'read.scanned', vars: { name } }); continue; }
+      const { parseSfdReport } = await import('../parsers/sfd-report.js');
+      const s = parseSfdReport(pages);
+      if (s.is_sfd_report && s.systems.length) { out.push(...fillSfd(s, name, pages)); good += 1; continue; }
+      const { parseWfdPortal } = await import('../parsers/wfd-portal.js');
+      const w = parseWfdPortal(pages);
+      if (w.is_wfd_portal && w.plastic_unmanaged_t !== null) { out.push(...fillWfd(w)); good += 1; continue; }
+      out.push({ kind: 'err', key: 'read.unknown', vars: { name } });
+    }
+    state.reading = out;
+    if (good) { state.view = 'check'; state.msgs = out.filter((m) => m.kind !== 'busy').map((m) => ({ ...m, kind: m.kind === 'note' ? 'warn' : m.kind })); render(true); } else render();
+  }
+
+  function analyse() {
+    const res = buildOwn(state.ownForm, sysIdx);
+    if (!res.own) { state.msgs = res.errors.map((e) => ({ kind: 'err', ...e })); $('#check-msgs').innerHTML = `<ul class="msgs">${state.msgs.map((m) => `<li class="msg-${m.kind}">${esc(t(m.key, m.vars))}</li>`).join('')}</ul>`; $('#check-msgs').scrollIntoView({ block: 'center' }); return; }
+    const basis = reportBasis(state.ownForm, state.upSnap, { sfd: Boolean(res.own.sfdTown), wfd: Boolean(res.own.wfdTown) });
+    const us = state.upMeta.sfd || {}; const uw = state.upMeta.wfd || {};
+    res.own.town.meta = { basis, sfd_basis: basis.sfd, sfd_file: us.file || null, sfd_date: us.date || null,
+      stated_safe: basis.sfd === 'typed' ? null : us.stated_safe ?? null, share_sum: basis.sfd === 'typed' ? null : us.share_sum ?? null,
+      wfd_portal: Boolean(uw.portal), wfd_version: uw.version || null, wfd_model: uw.model || null };
+    if (us.date) res.own.town.sfd.date = us.date;
+    state.own = res.own; state.townId = 'own'; state.msgs = [];
+    Object.assign(state, { gw: 'low', uptake: 0, treat: 0, wcol: null, wctl: 0, compost: false, view: 'work' });
+    render(true);
+  }
+
+  function preset(kind) {
+    const c0 = ctx.wv ? Math.round(ctx.wv.collected_share * 100) : null;
+    if (kind === 'full') Object.assign(state, { uptake: ctx.r ? 100 : 0, treat: ctx.r ? 100 : 0, wcol: c0 === null ? null : Math.max(c0, 90), wctl: ctx.wv ? 100 : 0, compost: Boolean(ctx.wv && ctx.wv.organic_share) });
+    else Object.assign(state, { uptake: 0, treat: 0, wcol: null, wctl: 0, compost: false });
+    refresh({ levers: true });
+  }
+
+  function tryLever(k) {
+    const c0 = ctx.wv ? Math.round(ctx.wv.collected_share * 100) : 0;
+    if (k === 'uptake') state.uptake = 100; else if (k === 'treat') state.treat = 100; else if (k === 'collection') state.wcol = Math.max(c0, 90);
+    else if (k === 'controlled') state.wctl = 100; else if (k === 'compost') state.compost = true;
+    refresh({ levers: true });
+    $('#sandbox').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  /* ----- run file ----- */
+  function saveRun() {
+    const run = { tool: 'sanitation-waste-planner', version: '0.3', exported: new Date().toISOString(), town: ctx.town.name,
+      levers: { gw: state.gw, uptake: state.uptake, treat: state.treat, wcol: state.wcol, wctl: state.wctl, compost: state.compost },
+      rates: state.rates, rule_overrides: state.ruleOverrides, currency: state.currency,
+      own_form: state.own ? state.ownForm : null, up_snap: state.own ? state.upSnap : null, up_meta: state.own ? state.upMeta : null, country: state.country };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(run, null, 1)], { type: 'application/json' }));
+    a.download = `planner-run-${ctx.town.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${today}.json`;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  const numOrNull = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null);
+  async function loadRun(file) {
+    try {
+      const run = JSON.parse(await file.text());
+      if (!run || run.tool !== 'sanitation-waste-planner' || typeof run.rates !== 'object') throw new Error('not a run file');
+      const rates = {};
+      for (const [id, o] of Object.entries(run.rates || {})) {
+        if (!/^[\w: ,.-]{1,80}$/.test(id) || !o || typeof o !== 'object') continue;
+        const c = {}; for (const k of ['capex', 'opex']) { const v = numOrNull(o[k]); if (v !== null) c[k] = v; }
+        if (Object.keys(c).length) rates[id] = c;
+      }
+      state.rates = rates;
+      const known = new Set(d.sizing.rules.map((x) => x.id));
+      state.ruleOverrides = Object.fromEntries(Object.entries(run.rule_overrides || {}).filter(([k, v]) => known.has(k) && numOrNull(v) > 0));
+      state.currency = typeof run.currency === 'string' ? run.currency.slice(0, 6) : '';
+      const lv = run.levers || {};
+      const p100 = (v) => Math.min(100, Math.max(0, Math.round(Number(v) || 0)));
+      Object.assign(state, { uptake: p100(lv.uptake), treat: p100(lv.treat), wctl: p100(lv.wctl), wcol: lv.wcol === null || lv.wcol === undefined ? null : p100(lv.wcol), compost: Boolean(lv.compost), gw: lv.gw === 'high' ? 'high' : 'low' });
+      state.runMsg = t('run.loaded');
+    } catch (err) { state.runMsg = t('run.bad'); }
+    render();
+    $('#sizing').scrollIntoView({ block: 'start' });
   }
 
   /* ----- events ----- */
-  tabs.addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) go(b.dataset.tab); });
-  tabs.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    const i = (TABS.indexOf(state.tab) + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
-    go(TABS[i]); tabs.querySelector(`[data-tab="${TABS[i]}"]`).focus();
-  });
-  $('#pdf').addEventListener('click', () => window.print());
-  select.addEventListener('change', () => setTown(select.value));
-  form.addEventListener('input', draw);
-  form.addEventListener('submit', (e) => e.preventDefault());
-  sheet.addEventListener('submit', (e) => e.preventDefault());
-  sheet.addEventListener('input', (e) => {
+  app.addEventListener('change', (e) => {
     const el = e.target;
-    if (el.dataset.lever) lever(el);
-    else if (el.dataset.own) { state.ownForm[el.dataset.own] = el.value; if (el.dataset.own.startsWith('share_')) $('#own-total').innerHTML = ownTotal(state.ownForm, t); }
-  });
-  sheet.addEventListener('change', (e) => {
-    const el = e.target;
-    if (el.dataset.cost) costEdit(el);
+    if (el.dataset.act === 'files' && el.files.length) handleFiles(el.files);
+    else if (el.dataset.act === 'country') state.country = el.value;
     else if (el.dataset.act === 'load-run' && el.files[0]) loadRun(el.files[0]);
-    else if (el.dataset.act === 'read-sfd' && el.files[0]) upload('sfd', el.files[0]);
-    else if (el.dataset.act === 'read-wfd' && el.files[0]) upload('wfd', el.files[0]);
   });
-  sheet.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-goto],[data-town],button[data-act]');
+  app.addEventListener('input', (e) => {
+    const el = e.target;
+    if (el.dataset.own) {
+      state.ownForm[el.dataset.own] = el.value;
+      if (el.dataset.own.startsWith('share_') && $('#share-total')) $('#share-total').innerHTML = shareTotal(state.ownForm, t);
+    } else if (el.dataset.lever) {
+      const k = el.dataset.lever;
+      if (k === 'compost') state.compost = el.checked;
+      else if (k === 'gw') { state.gw = el.checked ? 'high' : 'low'; refresh({ levers: true, verdict: true }); return; }
+      else { state[k] = Number(el.value); const o = $(`#out-${k}`); if (o) o.textContent = `${el.value}%`; }
+      refresh();
+    } else if (el.dataset.rate) {
+      const v = el.value.trim() === '' ? null : Number(el.value.replace(/,/g, ''));
+      const cur = state.rates[el.dataset.line] || {};
+      if (v === null || !Number.isFinite(v) || v < 0) delete cur[el.dataset.rate]; else cur[el.dataset.rate] = v;
+      if (Object.keys(cur).length) state.rates[el.dataset.line] = cur; else delete state.rates[el.dataset.line];
+      compute();
+      const line = ctx.sizing.lines.find((l) => l.id === el.dataset.line);
+      const cell = [...app.querySelectorAll('[data-total]')].find((x) => x.dataset.total === el.dataset.line);
+      if (line && cell) cell.innerHTML = lineTotals(line, ctx);
+      $('#totals').innerHTML = totalsBlock(ctx);
+    } else if (el.dataset.rule) {
+      const v = Number(el.value);
+      if (Number.isFinite(v) && v > 0) state.ruleOverrides[el.dataset.rule] = v; else delete state.ruleOverrides[el.dataset.rule];
+      refresh({ verdict: true });
+    } else if (el.dataset.act === 'currency') {
+      state.currency = el.value.trim().slice(0, 6);
+      compute(); $('#bridge').innerHTML = bridgeBlock(ctx); $('#totals').innerHTML = totalsBlock(ctx);
+    }
+  });
+  app.addEventListener('click', (e) => {
+    const el = e.target.closest('button[data-act]');
     if (!el) return;
-    if (el.dataset.goto) go(el.dataset.goto);
-    else if (el.dataset.town) { setTown(el.dataset.town); go('overview'); }
-    else if (el.dataset.act === 'save-run') saveRun();
-    else if (el.dataset.act === 'reset-costs') { state.costOverrides = {}; state.costMsg = t('costs.reset_done'); draw(); }
-    else if (el.dataset.act === 'use-own') useOwn();
-    else if (el.dataset.act === 'clear-own') { state.ownForm = {}; state.upSnap = {}; state.ownMsgs = []; draw(); }
+    const act = el.dataset.act;
+    if (act === 'show-sample') { state.showSample = true; render(); $('#sample-town').focus(); }
+    else if (act === 'open-sample') { state.townId = $('#sample-town').value; state.view = 'work'; render(true); }
+    else if (act === 'manual') { state.manual = true; state.view = 'check'; render(true); }
+    else if (act === 'analyse') analyse();
+    else if (act === 'restart') { state = defaultState(); render(true); }
+    else if (act === 'pdf') window.print();
+    else if (act === 'preset') preset(el.dataset.preset);
+    else if (act === 'try') tryLever(el.dataset.lever);
+    else if (act === 'save-run') saveRun();
   });
+  for (const type of ['dragenter', 'dragover']) app.addEventListener(type, (e) => { const z = e.target.closest?.('.drop'); if (z) { e.preventDefault(); z.classList.add('over'); } });
+  app.addEventListener('dragleave', (e) => { const z = e.target.closest?.('.drop'); if (z && !z.contains(e.relatedTarget)) z.classList.remove('over'); });
+  app.addEventListener('drop', (e) => { const z = e.target.closest?.('.drop'); if (!z) return; e.preventDefault(); z.classList.remove('over'); if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
+  window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('drop', (e) => e.preventDefault());
 
-  $('#foot').innerHTML = `<p>${esc(t('foot.privacy'))}</p><p>${esc(t('foot.versions', { rules: d.rules.data_version, data: d.sfd.data_version, source: d.sfd.source }))}</p><p>${esc(t('foot.licence'))}</p>`;
-  draw();
+  render();
 }
 
-// One tooltip for every mark that carries data-tip (bar segments, ribbons, dots).
-function tooltips() {
-  const tip = $('#tip');
-  const show = (el) => {
-    tip.textContent = el.dataset.tip;
-    tip.hidden = false;
-    const b = el.getBoundingClientRect();
-    const w = tip.offsetWidth;
-    tip.style.left = `${Math.max(8, Math.min(window.innerWidth - w - 8, b.left + b.width / 2 - w / 2))}px`;
-    tip.style.top = `${Math.max(8, b.top - tip.offsetHeight - 8)}px`;
-  };
-  const hide = () => { tip.hidden = true; };
-  const target = (e) => (e.target instanceof Element ? e.target.closest('[data-tip]') : null);
-  document.addEventListener('pointerover', (e) => { const el = target(e); if (el) show(el); else hide(); });
-  document.addEventListener('focusin', (e) => { const el = target(e); if (el) show(el); else hide(); });
-  document.addEventListener('focusout', hide);
-  window.addEventListener('scroll', hide, { passive: true });
-}
-
-loadAll().then((d) => { start(d); tooltips(); }).catch((err) => {
-  $('#sheet').innerHTML = '<p class="banner">The data files could not be loaded. Reload the page; if you opened the file directly from disk, serve the folder over HTTP instead.</p>';
+loadAll().then(start).catch((err) => {
+  $('#app').innerHTML = '<p class="draft">The page could not load its data files. Reload to try again; if you opened the file from disk, serve the folder over HTTP instead.</p>';
   console.error(err);
 });
 
