@@ -1,0 +1,154 @@
+15/11/2026, 00:07 Waste Flow Diagram Data Portal
+Case study ____________
+Kaliakair,
+Bangladesh, Asia
+Waste Flow Diagram Version 2.0
+Uses modified open burning model
+Factor set: University of Leeds (GIZ original set)
+Original set developed during the original GIZ WFD project, featured very high leakage factor for
+environmental causes (flooding / landslip).
+https://wfd-data.rwm.global//map/showstudy/119/plastics/7.4881932053524745/89.76974119501291/23.967197834431786 1/6
+
+15/11/2026, 00:07 Waste Flow Diagram Data Portal
+Kaliakair
+Bangladesh
+Population Total MSW Generation
+277,423 74.34 kg/cap/year
+Urbanisation class MSW Collected
+53%
+Settlement type Plastic Waste Generation
+Urban 8.6 kg/cap/year
+Year of Survey Plastic to water systems
+2023 0.6 kg/cap/year
+Borders map courtesy of geoBoundaries
+
+15/11/2026, 00:07 Waste Flow Diagram Data Portal
+The Waste Flow Diagram: Identifying Leakages from Municipal 3
+Waste Management Systems
+Survey implementation
+City Kaliakair
+arrangement
+Financed by
+Bill and Melinda Gates Foundation
+Implemented by
+Overview data
+Population 277,423
+Waste generation rate, including 0.21 kg/capita/day
+commercial and institutional waste
+Total MSW generation
+58 tonnes/day
+Collection rate 53 %
+MSW sent to disposal
+48 %
+MSW sorted for recovery 3 %
+MSW managed in controlled facilities 0 %
+Plastic waste generation
+2,374 tonnes/year
+Unmanaged plastic 49 % of the entire plastic waste generation
+paper metals
+MSW composition at point of
+3.23 % 0.00 %
+generation
+plastics other
+11.16 % 3.60 %
+glass organic
+1.25 % 80.76 %
+https://wfd-data.rwm.global//map/showstudy/119/plastics/7.4881932053524745/89.76974119501291/23.967197834431786 3/6
+
+15/11/2026, 00:07 Waste Flow Diagram Data Portal
+The Waste Flow Diagram: Identifying Leakages from Municipal 4
+Waste Management Systems
+Plastic waste Fate of unmanaged Plastic to water
+WFD
+generation: 2,374 t/y plastic waste systems
+results
+Unmanaged Retained on land Contribution
+49 % 48 %
+directly entering
+water systems
+Managed Cleaned from 69 %
+51 % drains
+Contribution
+2 %
+entering via storm
+Ending up in drains
+water systems 31 %
+15 %
+Openly burnt
+35 %
+Plastic waste to the 1,158 tonnes/year 49 % of the plastic waste
+environment generated
+Plastic to water systems
+174 tonnes/year 256 trucks
+Plastic to water systems 0.6 kg/person/year 20 PET bottles per person
+per person
+Unmanaged plastic
+contribution by solid waste
+management step
+UNCOLLECTED COLLECTION SORTING TRANSPORTA- DISPOSAL
+WASTE SYSTEM STAGE TION
+675 t/y 107 t/y 0 t/y 4 t/y 372 t/y
+PLASTIC LEAKAGE
+1,158 t/y
+© All rights reserved by GIZ
+https://wfd-data.rwm.global//map/showstudy/119/plastics/7.4881932053524745/89.76974119501291/23.967197834431786 4/6
+
+15/11/2026, 00:07 Waste Flow Diagram Data Portal
+The Waste Flow Diagram: Identifying Leakages from Municipal 5
+Waste Management Systems
+Plastic leakage potential
+Collection
+levels per leakage
+services
+Formal
+influencers
+sorting
+collection
+containers High
+Transportation Disposal
+loading High
+method disposal of to disposal facilities
+None
+transport Medium non-recyclab
+les
+reloading / High
+transfer
+environmental
+Low
+hazards
+exposure to
+Informal Informal weather Medium
+capacity Medium
+value-chain vs load waste
+sorting Medium
+handling
+collection waste High
+containment coverage Very high
+vehicle cover burning High
+Very high
+fencing High
+disposal of
+High
+recyclables non-recyclab
+les
+extraction Medium
+method
+transportation Medium
+method
+© All rights reserved by GIZ
+Sankey waste flow diagram
+Retained at disposal sites: 804
+Disposal
+Collection services
+Sorted for recovery: 412
+Generation: 2,374 t/year
+Sorting by informal sector
+Land: 557
+Informal collection
+Drains: 23
+Water: 174
+Unmanaged: 1,158 Unmanaged: 1,158
+Uncollected
+Burnt: 405
+■ Managed / controlled ■ Mismanaged (uncontrolled) ■ Mismanaged (leakage) ■ Unmanaged
+https://wfd-data.rwm.global//map/showstudy/119/plastics/7.4881932053524745/89.76974119501291/23.967197834431786 5/6

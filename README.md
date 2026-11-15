@@ -1,27 +1,31 @@
 # sanitation-waste-planner
 
-A rule-based planning tool for Bangladeshi municipalities (paurashavas). It reads a town's excreta flow diagram (SFD), shows where the excreta goes and which loss is largest, and lists the options that apply with their costs. Every figure traces to a rule and a cost row you can open and change. It runs in the browser; nothing you enter leaves your device.
+A rule-based planning tool for Bangladeshi municipalities (paurashavas). It reads a town's excreta flow diagram (SFD) and waste flow diagram (WFD), shows where excreta and plastic end up and which loss is largest, and turns that into an ordered plan in plain terms. Every figure traces to a rule and a cost row you can open and change. It runs in the browser; nothing you enter or upload leaves your device.
 
-**Status: draft v0.1. Costs are placeholders that test the calculation. Do not quote any taka figure from this tool.** Draft for review; not an official publication of DPHE, WaterAid or GIZ.
+**Status: draft v0.2. Costs are placeholders that test the calculation. Do not quote any taka figure from this tool.** Draft for review; not an official publication of DPHE, WaterAid or GIZ.
 
-## What v0.1 does
+## What v0.2 does
 
-- Holds the SFD system mix of 50 municipalities (SFD Lite, level 0.5, status Draft, 2023) as built-in examples.
-- Shows the outcome of each town: safely managed excreta and the four routes by which the rest is lost.
-- Names the largest loss and says whether the tool can cost it yet.
-- Lists who is on which sanitation system, in people and households.
-- Orders containment options by yearly cost per person moved from a system that does not contain to one that does, with low, mid and high costs.
-- Treats emptying, transport and treatment as one package. Emptying is never ranked alone: without treatment it moves sludge from the pit to the environment.
-- Has a groundwater switch. All 50 SFDs assume low groundwater risk; at high risk, soak pits and open-bottom pits and tanks stop containing.
-- Compares the town with the other 49.
-- Lists, for every town, what the draft cannot tell you.
+- **Overview.** One statement and one picture each for excreta and solid waste, and the first three things to do.
+- **Sanitation.** Where the excreta goes (flows from toilet and tank types to outcomes), the largest loss and what it means, who is on which system, containment options ordered by yearly cost per person newly contained, and emptying, transport and treatment as one package. Emptying is never ranked alone.
+- **Solid waste.** Waste produced and collected, where plastic escapes by stage, and where it ends up. Options are listed by stage and not costed.
+- **Plan.** An ordered list of decisions for sanitation and solid waste. A "what if" for each: move households to the cheapest fix, treat a share of emptied sludge, raise collection, control the dumpsite, or set a target for safely managed excreta and see what it takes.
+- **Costs.** Every unit cost can be changed in the page. Changed figures are marked as the user's own, on screen and in the saved run file.
+- **Compare.** The town among the 50 surveyed towns, on sanitation and solid waste.
+- **Your town.** Type a town in, or read a published report in the browser: an SFD Lite report (DPHE CWIS-FSM Support Cell format) or a WFD Data Portal page saved as PDF. The tool fills a form, shows what it could not find, and waits for you to confirm.
+- **Sources.** National context figures with source, year and scope; what the draft cannot tell you; how the tool works.
+- **Download PDF.** A one-page sheet for the town. It carries no taka totals while costs are placeholders.
+- Works offline after one visit.
+- Holds 50 municipalities (SFD Lite, level 0.5, status Draft, 2023, and their WFDs) as built-in examples, with a groundwater switch: all 50 SFDs assume low groundwater risk.
 
-## What v0.1 cannot do
+## What v0.2 cannot do
 
 - Cost treatment. The treatment plant, emptying vehicles and land have no cost data or sizing rule yet, and in 49 of the 50 towns sludge that is emptied and not treated is the largest loss.
-- Estimate municipal cost. Every costed option so far is paid by households.
+- Cost anything in solid waste, or estimate municipal cost. Every costed option so far is paid by households.
 - Give real costs. Every cost row is a placeholder with no source.
-- Read an uploaded SFD or WFD report, or show the solid-waste (WFD) side. Both come in the next step.
+- Read the SFD matrix or graphic in a report: they are images. Shares come from the report's prose, which can leave systems out; the tool shows the shortfall and asks.
+- Re-run a WFD. The solid-waste "what if" scales the published result.
+- Turn a town's flows into deaths, illness or economic return. National and global figures are shown as context and labelled as such.
 - Check conditions such as plot space, road access or flooding for individual households.
 
 ## How it is built
@@ -53,10 +57,12 @@ vendor/fonts/           Hind Siliguri (SIL Open Font License)
 python scripts/check_repo.py          # nothing forbidden is in the repository
 python scripts/build_data.py --check  # JSON matches the workbook
 python scripts/check_workbook.py      # the workbook's own test sheet matches the engine
-node --test tests/*.test.mjs          # engine, independent Python reference, page
+node --test tests/*.test.mjs          # engine, independent Python reference, parsers, every tab of the page, offline list
 ```
 
-The JavaScript engine is compared with an independent Python implementation on all 50 towns, both groundwater settings, both household bases and the three cost cases.
+The JavaScript engine is compared with an independent Python implementation on all 50 towns, both groundwater settings, both household bases and the three cost cases. The what-if, decision and solid-waste modules are new in v0.2 and are tested in JavaScript only; they are not yet in the Python reference.
+
+To test the report parsers against the PDFs themselves, set `SFD_PDF` and `WFD_PDF` to their paths. The WFD portal report is copyright GIZ and is never committed; `tests/fixtures/` holds text fixtures only.
 
 ### Running it locally
 

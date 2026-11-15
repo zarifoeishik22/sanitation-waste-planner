@@ -5,12 +5,12 @@
 import { COMPONENTS } from '../engine/sfd.js';
 
 const nf0 = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
-const nf1 = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export const nf1 = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const int = (v) => nf0.format(v);
 export const pct = (v, d = 1) => `${(v * 100).toFixed(d)}%`;
-const round3 = (v) => (v >= 1000 ? Math.round(v / 100) * 100 : Math.round(v / 10) * 10); // people and households are estimates: no false precision
+export const round3 = (v) => (v >= 1000 ? Math.round(v / 100) * 100 : Math.round(v / 10) * 10); // people and households are estimates: no false precision
 
 export function makeT(strings) {
   return (key, vars = {}) => {
@@ -21,17 +21,17 @@ export function makeT(strings) {
 }
 
 /** A taka figure with its low-to-high range, always marked while costs are placeholders. */
-function money(cost, field, ph) {
+export function money(cost, field, ph) {
   const v = (k) => int(cost[k][field]);
   if (cost.mid[field] === 0 && cost.high[field] === 0) return '<span class="num">0</span>';
   return `<span class="num"><span class="val${ph ? ' ph' : ''}">${v('mid')}</span> <span class="range">(${v('low')} to ${v('high')})</span></span>`;
 }
 
-function banner(r, t) {
+export function banner(r, t) {
   return `<p class="banner" role="note">${esc(t(r.placeholder_in_use ? 'banner.draft' : 'banner.real'))}</p>`;
 }
 
-function outcomeSection(r, town, t) {
+export function outcomeSection(r, town, t) {
   const c = r.outcome.components;
   const total = COMPONENTS.reduce((a, k) => a + c[k], 0) || 1;
   const segs = COMPONENTS.filter((k) => c[k] > 0).map((k) => {
@@ -47,11 +47,11 @@ function outcomeSection(r, town, t) {
     <p class="lead">${esc(t(high ? 'outcome.lead_high' : 'outcome.lead_low', { safe: pct(c.safe) }))}</p>
     <div class="flowbar" role="img" aria-label="${esc(COMPONENTS.map((k) => `${t(`comp.short.${k}`)} ${pct(c[k])}`).join(', '))}">${segs}</div>
     <ul class="legend">${legend}</ul>
-    <p class="source">${esc(t(high ? 'outcome.source_high' : 'outcome.source_low', { date: town.sfd.date, by: town.sfd.prepared_by }))}</p>
+    <p class="source">${esc(t(high ? 'outcome.source_high' : town.typed ? 'outcome.source_typed' : 'outcome.source_low', { date: town.sfd.date, by: town.sfd.prepared_by }))}</p>
   </section>`;
 }
 
-function bindingSection(r, t) {
+export function bindingSection(r, t) {
   const c = r.outcome.components;
   const key = r.outcome.binding.key;
   const chain = key === 'f11';
@@ -70,7 +70,7 @@ function bindingSection(r, t) {
   </section>`;
 }
 
-function gapSection(r, t) {
+export function gapSection(r, t) {
   const o = r.outcome;
   const rows = o.systems.slice().sort((a, b) => b.pop_share - a.pop_share).map((s) => {
     const status = s.contained ? ['yes', t('gap.yes')] : s.flipped ? ['flip', t('gap.flipped')] : ['no', t('gap.no')];
@@ -95,7 +95,7 @@ function bearers(cost) {
   return Object.keys(cost.mid.by_bearer).join(', ');
 }
 
-function rankedSection(r, t) {
+export function rankedSection(r, t) {
   const byId = Object.fromEntries(r.options.map((o) => [o.id, o]));
   const ph = r.placeholder_in_use;
   let body;
@@ -149,7 +149,7 @@ function rankedSection(r, t) {
   </section>`;
 }
 
-function chainSection(r, t) {
+export function chainSection(r, t) {
   const ch = r.chain;
   const byId = Object.fromEntries(r.options.map((o) => [o.id, o]));
   const emptying = ch.emptying_options.map((id) => byId[id]).find((o) => o.complete);
@@ -172,7 +172,7 @@ function chainSection(r, t) {
   </section>`;
 }
 
-function otherSection(r, t) {
+export function otherSection(r, t) {
   const rest = r.options.filter((o) => o.status !== 'ranked' && o.status !== 'needs_treatment');
   if (!rest.length) return '';
   // one line per option name and reason, listing the systems it covers
@@ -199,50 +199,40 @@ function otherSection(r, t) {
   </section>`;
 }
 
-const PEER_KEYS = ['not_contained', 'safe', 'f11', 'flips_if_gw_high'];
+export const PEER_KEYS = ['not_contained', 'safe', 'f11', 'flips_if_gw_high'];
 
-function peersSection(peers, town, t) {
-  const strips = PEER_KEYS.map((key) => {
+export function peersStrips(keys, peers, me, t, fmt = pct) {
+  return keys.map((key) => {
     const vals = peers.map((p) => p[key]).sort((a, b) => a - b);
-    const max = Math.max(0.1, Math.ceil(vals.at(-1) * 10) / 10);
-    const median = (vals[24] + vals[25]) / 2;
-    const me = peers.find((p) => p.id === town.id);
-    const below = peers.filter((p) => p.id !== town.id && p[key] < me[key]).length;
+    const top = Math.max(vals.at(-1), me[key]);
+    const max = fmt === pct ? Math.max(0.1, Math.ceil(top * 10) / 10) : Math.max(1, Math.ceil(top));
+    const mid = Math.floor(vals.length / 2);
+    const median = vals.length % 2 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+    const others = peers.filter((p) => p.id !== me.id);
+    const below = others.filter((p) => p[key] < me[key]).length;
     const x = (v) => (10 + (v / max) * 580).toFixed(1);
-    const dots = peers.filter((p) => p.id !== town.id).map((p) => `<circle class="dot" cx="${x(p[key])}" cy="18" r="4.5" tabindex="0" data-tip="${esc(p.name)}: ${pct(p[key])}"></circle>`).join('');
+    const dots = others.map((p) => `<circle class="dot" cx="${x(p[key])}" cy="18" r="4.5" tabindex="0" data-tip="${esc(p.name)}: ${fmt(p[key])}"></circle>`).join('');
     return `<div class="strip">
       <p class="strip-title">${esc(t(`peer.${key}`))}</p>
-      <p class="strip-value">${esc(t('peers.rank', { value: pct(me[key]), below }))}</p>
-      <svg viewBox="0 0 600 36" role="img" aria-label="${esc(t(`peer.${key}`))}: ${pct(me[key])}">
+      <p class="strip-value">${esc(t('peers.rank', { value: fmt(me[key]), below, n: others.length }))}</p>
+      <svg viewBox="0 0 600 36" role="img" aria-label="${esc(t(`peer.${key}`))}: ${fmt(me[key])}">
         <line class="axis" x1="10" y1="18" x2="590" y2="18"></line>
         <line class="median" x1="${x(median)}" y1="4" x2="${x(median)}" y2="32"></line>
         ${dots}
-        <circle class="dot-me" cx="${x(me[key])}" cy="18" r="7" tabindex="0" data-tip="${esc(me.name)}: ${pct(me[key])}"></circle>
+        <circle class="dot-me" cx="${x(me[key])}" cy="18" r="7" tabindex="0" data-tip="${esc(me.name)}: ${fmt(me[key])}"></circle>
       </svg>
-      <p class="strip-scale"><span>0%</span><span>${esc(t('peers.median', { value: pct(median) }))}</span><span>${pct(max, 0)}</span></p>
+      <p class="strip-scale"><span>${fmt === pct ? '0%' : '0'}</span><span>${esc(t('peers.median', { value: fmt(median) }))}</span><span>${fmt === pct ? pct(max, 0) : fmt(max)}</span></p>
     </div>`;
   }).join('');
-  return `<section class="block" aria-labelledby="h-peers">
-    <h2 id="h-peers">${esc(t('sec.peers', { town: town.name }))}</h2>
-    <p class="lead">${esc(t('peers.lead'))}</p>
-    <div class="strips">${strips}</div>
-  </section>`;
 }
 
-function notesSection(r, town, peers, t) {
-  const me = peers.find((p) => p.id === town.id);
+export function notesSection(r, town, me, t) {
   const vars = {
     level: town.sfd.level, status: town.sfd.status.toLowerCase(), size: r.settings.params.hh_size,
     share: pct(me.flips_if_gw_high, 0), persons: int(round3(r.summary.persons_uncovered)), systems: r.summary.systems_uncovered.join(', '),
   };
-  const items = r.notes.map((n) => `<li>${esc(t(`note.${n}`, vars))}</li>`).join('');
+  const items = r.notes.map((n) => `<li>${esc(t(`note.${n === 'sfd_draft' && town.typed ? 'sfd_typed' : n}`, vars))}</li>`).join('');
   return `<section class="block notes" aria-labelledby="h-notes"><h2 id="h-notes">${esc(t('sec.notes'))}</h2><ul>${items}</ul></section>`;
-}
-
-/** The whole right-hand sheet for one town. */
-export function renderSheet(r, town, peers, t) {
-  return [banner(r, t), outcomeSection(r, town, t), bindingSection(r, t), gapSection(r, t), rankedSection(r, t), chainSection(r, t),
-    otherSection(r, t), peersSection(peers, town, t), notesSection(r, town, peers, t)].join('\n');
 }
 
 /** The town facts shown in the left rail. */
@@ -250,11 +240,12 @@ export function renderFacts(r, town, t) {
   const hh = r.households;
   const flags = town.flags.length ? `<div class="flags"><p class="rail-label">${esc(t('rail.flags'))}</p><ul>${town.flags.map((f) => `<li>${esc(f)}</li>`).join('')}</ul></div>` : '';
   return `<dl class="facts">
-    <div><dt>${esc(t('rail.district'))}</dt><dd>${town.district ? esc(town.district) : `<span class="muted">${esc(t('rail.district_missing'))}</span>`}</dd></div>
+    ${town.typed ? '' : `<div><dt>${esc(t('rail.district'))}</dt><dd>${town.district ? esc(town.district) : `<span class="muted">${esc(t('rail.district_missing'))}</span>`}</dd></div>`}
     <div><dt>${esc(t('rail.population'))}</dt><dd class="num">${int(town.population_sfd)}</dd></div>
     <div><dt>${esc(t('rail.households'))}</dt><dd><span class="num">${int(Math.round(hh.households))}</span>
       <span class="sub">${esc(hh.basis === 'stated' ? t('rail.households_stated') : t('rail.households_assumed', { size: r.settings.params.hh_size }))}</span></dd></div>
-    <div><dt>${esc(t('rail.sfd'))}</dt><dd>${esc(t('rail.sfd_value', { level: town.sfd.level, status: town.sfd.status.toLowerCase(), date: town.sfd.date }))}</dd></div>
-    <div><dt>${esc(t('rail.prepared_by'))}</dt><dd>${esc(town.sfd.prepared_by)}</dd></div>
+    ${town.typed ? `<div><dt>${esc(t('rail.sfd'))}</dt><dd>${esc(t('rail.sfd_typed'))}</dd></div>`
+    : `<div><dt>${esc(t('rail.sfd'))}</dt><dd>${esc(t('rail.sfd_value', { level: town.sfd.level, status: town.sfd.status.toLowerCase(), date: town.sfd.date }))}</dd></div>
+    <div><dt>${esc(t('rail.prepared_by'))}</dt><dd>${esc(town.sfd.prepared_by)}</dd></div>`}
   </dl>${flags}`;
 }
