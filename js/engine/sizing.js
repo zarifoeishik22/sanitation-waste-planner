@@ -36,11 +36,14 @@ export function fullLevels(wv) {
  * r = plan() result; wv = wfdView() or null; levels = { uptake, treat, collection, controlled, compost }.
  * rules = ruleValues(); costs = cost items; optionsById = rules.options by id; rates = user's { lineId: { capex, opex } }.
  */
-export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {} }) {
+export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {}, existing = {} }) {
   const costsById = Object.fromEntries(costs.items.map((i) => [i.id, i]));
   const optById = Object.fromEntries(ruleOptions.map((o) => [o.id, o]));
   const lines = [];
-  const add = (line) => {
+  const add = (line0) => {
+    // What the municipality already runs (workbook tier 2) is taken off the need; the line stays so the plan shows it is covered.
+    const have = num(existing[line0.id]) ? existing[line0.id] : null;
+    const line = have === null ? line0 : { ...line0, units: { ...line0.units, need: line0.units.value, existing: have, value: Math.max(0, Math.round((line0.units.value - have) * 10) / 10) } };
     const def = defaultRate(line.items, costsById);
     const user = rates[line.id] || {};
     const capex = num(user.capex) ? user.capex : def.usable ? def.capex : null;

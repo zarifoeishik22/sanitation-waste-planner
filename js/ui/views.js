@@ -26,7 +26,7 @@ export function renderLanding(state, d, t) {
     <h1 class="display">${esc(t('land.h1'))}</h1>
     <p class="lede">${esc(t('land.lede'))}</p>
     <label class="drop" id="drop" for="files">
-      <input type="file" id="files" class="visually-hidden" accept="application/pdf,.pdf" multiple data-act="files">
+      <input type="file" id="files" class="visually-hidden" accept="application/pdf,.pdf,.xlsx" multiple data-act="files">
       <svg class="drop-mark" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8h22l10 10v32H14z"/><path d="M36 8v10h10"/><path d="M24 20h26l-0 36H24" class="sheet2"/><path d="M32 44V30m-6 6 6-6 6 6"/></svg>
       <span class="drop-title">${esc(t('land.drop'))}</span>
       <span class="drop-sub">${esc(t('land.drop_sub'))}</span>
@@ -36,6 +36,7 @@ export function renderLanding(state, d, t) {
     <div class="alt">
       <button type="button" class="link" data-act="show-sample">${esc(t('land.sample'))}</button>
       <button type="button" class="link" data-act="manual">${esc(t('land.manual'))}</button>
+      <button type="button" class="link" data-act="wb-blank">${esc(t('land.blank'))}</button>
     </div>
     ${sample}
   </section>`;
@@ -150,7 +151,7 @@ export function basisLine(ctx) {
   return t('basis.mixed', { sfd: t(`basis.b.${b.sfd}`), wfd: t(`basis.b.${b.wfd}`) });
 }
 
-function flagText(f, ctx) {
+export function flagText(f, ctx) {
   const { t } = ctx;
   const v = f.vars;
   const m = {
@@ -172,7 +173,7 @@ function flagText(f, ctx) {
   return t(key, m ? m() : {});
 }
 
-function actionCard(a, ctx) {
+export function actionCard(a, ctx) {
   const { t, full } = ctx;
   const line = (id) => full.lines.find((l) => l.id === id);
   let title; let why; let takes;
@@ -328,6 +329,7 @@ function lineText(l, ctx) {
   else if (l.kind === 'compost') { deficit = t('line.compost_def', { n: qty(dv.value), share: pct(dv.organic) }); rule = t('rule.compost', { capture: pct(rules.organic_capture), at: qty(dv.at_plant), mod: rules.compost_module_t_day, yield: rules.compost_yield });
     units = t('line.compost_units', { modules: l.units.modules, cap: int(l.units.value), compost: qty(l.units.compost_t_day) }); }
   else { deficit = t('line.disposal_def', { n: qty(dv.value) }); rule = t('rule.none'); units = t('line.unsized'); }
+  if (l.units.existing !== undefined) units = t(l.units.value > 0 ? 'line.after_existing' : 'line.covered', { units, need: qty(l.units.need), have: qty(l.units.existing) });
   const statuses = l.rule.ids.map((id) => d.sizing.rules.find((x) => x.id === id).status);
   const tag = l.kind === 'contain' || !statuses.length ? (l.kind === 'disposal' ? null : 'assumption') : statuses.every((s) => s === 'CITED') ? 'cited' : statuses.some((s) => s === 'CITED') ? 'mixed' : 'assumption';
   return { title, deficit, rule, units, tag };
@@ -337,7 +339,7 @@ export function lineTotals(l, ctx) {
   const { t, state } = ctx;
   if (l.unsized) return `<span class="none">${esc(t('line.unsized'))}</span>`;
   if (l.capex_total === null && l.opex_total === null) return `<span class="none">${esc(t('line.no_rate'))}</span>`;
-  const cur = state.currency ? `${state.currency} ` : '';
+  const cur = ctx.currency ? `${ctx.currency} ` : '';
   return `${l.capex_total !== null ? `<span class="num big">${esc(cur)}${int(l.capex_total)}</span>` : ''}${l.opex_total !== null && l.opex_total > 0 ? `<span class="per-year">${esc(t('line.per_year', { n: `${cur}${int(l.opex_total)}` }))}</span>` : ''}
     <span class="tag tag-${l.rate.source}">${esc(t(`rate.${l.rate.source}`))}</span>`;
 }
@@ -366,7 +368,7 @@ export function totalsBlock(ctx) {
   const tt = sizing.totals;
   if (!sizing.lines.length) return '';
   if (!tt.priced) return `<p class="totals totals-none">${esc(t('tot.none'))}</p>`;
-  const cur = state.currency ? `${state.currency} ` : '';
+  const cur = ctx.currency ? `${ctx.currency} ` : '';
   return `<p class="totals"><span class="tot-k">${esc(t('tot.capex'))}</span> <span class="num big">${esc(cur)}${int(tt.capex)}</span>
     ${tt.opex > 0 ? `<span class="tot-k">${esc(t('tot.opex'))}</span> <span class="num big">${esc(cur)}${int(tt.opex)}</span>` : ''}
     <span class="tot-note">${esc(t(tt.unpriced ? 'tot.partial' : 'tot.all', { priced: tt.priced, total: tt.priced + tt.unpriced }))}</span></p>`;
@@ -382,7 +384,7 @@ export function bridgeBlock(ctx) {
     ${waste.length ? `<h3 class="minor">${esc(t('size.waste'))}</h3>${waste.map((l) => bridgeLine(l, ctx)).join('')}` : ''}`;
 }
 
-function rulesTable(ctx) {
+export function rulesTable(ctx) {
   const { t, d, state } = ctx;
   const rows = d.sizing.rules.map((x) => `<tr><th scope="row">${esc(x.label)}<span class="src">${x.url ? `<a href="${esc(x.url)}" rel="noopener noreferrer" target="_blank">${esc(x.source)}</a>` : esc(x.source)}${x.caveat ? ` ${esc(x.caveat)}` : ''}</span></th>
       <td><input type="text" inputmode="decimal" autocomplete="off" class="rule-in" data-rule="${x.id}" value="${esc(state.ruleOverrides[x.id] ?? x.value)}" aria-label="${esc(x.label)}"> <span class="unit">${esc(x.unit)}</span></td>
@@ -396,7 +398,7 @@ export function sizingSection(ctx) {
   return `<section class="sizing" id="sizing" aria-labelledby="size-h">
     <h2 id="size-h">${esc(t('size.h'))}</h2>
     <p class="section-lede">${esc(t('size.lede'))}</p>
-    <label class="fld fld-cur"><span>${esc(t('size.currency'))}</span><input type="text" maxlength="6" autocomplete="off" data-act="currency" value="${esc(state.currency)}" placeholder="${esc(t('size.currency_ph'))}"></label>
+    <label class="fld fld-cur"><span>${esc(t('size.currency'))}</span><input type="text" maxlength="6" autocomplete="off" data-act="currency" value="${esc(ctx.currency)}" placeholder="${esc(t('size.currency_ph'))}"></label>
     <div id="bridge">${bridgeBlock(ctx)}</div>
     <div id="totals">${totalsBlock(ctx)}</div>
     ${rulesTable(ctx)}
@@ -410,7 +412,7 @@ export function sizingSection(ctx) {
 
 /* ----- evidence ----- */
 
-function strip(label, value, values, fmt, t, lowIsGood) {
+export function strip(label, value, values, fmt, t, lowIsGood) {
   if (value === null || value === undefined) return '';
   const xs = values.filter((v) => typeof v === 'number');
   const max = Math.max(...xs, value) || 1;

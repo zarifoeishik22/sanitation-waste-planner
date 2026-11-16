@@ -1,13 +1,19 @@
 // Offline copy of the planner's own files. Network first: when online the newest version is always used and stored;
 // when offline the stored copy answers. Only same-origin GET requests are handled; nothing the user types is stored.
-const CACHE = 'planner-v0.3';
+const CACHE = 'planner-v0.4';
 // Every file the page can ask for, so the tool works offline after one visit (tests/offline.test.mjs keeps this list complete).
 const PRECACHE = [
  "./",
  "index.html",
  "css/site.css",
  "js/ui/app.js",
+ "js/ui/charts.js",
  "js/ui/context.js",
+ "js/ui/screens.js",
+ "js/xlsx/workbook.js",
+ "js/xlsx/zip.js",
+ "js/engine/analysis.js",
+ "js/engine/template.js",
  "js/ui/scene.js",
  "js/ui/util.js",
  "js/ui/views.js",
