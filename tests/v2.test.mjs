@@ -10,7 +10,7 @@ import { checkListing, libraryFile, normName } from '../js/engine/pubindex.js';
 import { ruleValues, sizeBridge, fullLevels } from '../js/engine/sizing.js';
 
 const d = { towns: load('towns.json'), sfd: load('sfd.json'), wfd: load('wfd.json'), rules: load('rules.json'), costs: load('costs.json'), params: load('params.json'),
-  benchmarks: load('benchmarks.json'), sizing: load('sizing.json'), pubindex: load('pubindex.json'), strings: load('strings.en.json') };
+  benchmarks: load('benchmarks.json'), sizing: load('sizing.json'), pubindex: load('pubindex.json'), unit_costs: load('unit_costs.json'), strings: load('strings.en.json') };
 const sysIdx = systemIndex(d.rules);
 const missing = new Set();
 const base = makeT(d.strings);
@@ -18,7 +18,7 @@ const t = (k, v) => { if (!(k in d.strings)) missing.add(k); return base(k, v); 
 const BROKEN = /NaN|undefined|Infinity|\{\w+\}|>null<|\[object/;
 const CODE = /T\dA\dC\d/;
 const text = (html) => html.replace(/<[^>]+>/g, ' ');
-const ctxOf = (state) => buildContext(d, { ...defaultState(), view: 'work', ...state }, t, '2026-11-16');
+const ctxOf = (state, dOver = {}) => buildContext({ ...d, ...dOver }, { ...defaultState(), view: 'work', ...state }, t, '2026-11-16');
 const town = (name) => String(d.towns.towns.find((x) => x.name === name).id);
 
 function checkHtml(html, where) {
@@ -43,18 +43,23 @@ test('every built-in town renders, today and with a plan, at both groundwater se
   assert.deepEqual([...missing], [], 'strings missing from the strings file');
 });
 
-test('no investment total appears until a rate is entered, and then only for priced lines', () => {
+test("totals come only from the engineer's sheet or the user, never from draft figures", () => {
   const state = { townId: town('Kaliakair') };
-  let ctx = ctxOf(state);
-  assert.equal(ctx.sizing.totals.priced, 0);
-  assert.ok(text(renderWork(ctx)).includes('Enter unit rates to see the investment'));
-  ctx = ctxOf({ ...state, rates: { vehicles: { capex: 1000, opex: 10 } } });
-  const v = ctx.sizing.lines.find((l) => l.id === 'vehicles');
-  assert.equal(v.capex_total, 1000 * v.units.value);
-  assert.equal(ctx.sizing.totals.capex, v.capex_total);
-  assert.equal(ctx.sizing.totals.priced, 1);
-  assert.ok(ctx.sizing.totals.unpriced > 0);
+  const noEng = ctxOf(state, { unit_costs: null });
+  assert.equal(noEng.sizing.totals.priced, 0, 'without the engineer sheet nothing is priced');
+  assert.ok(text(renderWork(noEng)).includes('Enter unit rates to see the investment'));
+  const ctx = ctxOf(state);
+  for (const l of ctx.sizing.lines) {
+    if (l.rate.source === 'engineer') assert.ok(l.capex_total > 0 && l.capex_range.low <= l.capex_total && l.capex_total <= l.capex_range.high, l.id);
+    else assert.ok(['included', 'none'].includes(l.rate.source), `${l.id}: ${l.rate.source}`);
+  }
+  const compost = ctx.full.lines.find((l) => l.id === 'compost');
+  assert.equal(compost.rate.source, 'none', 'the contradictory compost row is not used');
+  const user = ctxOf({ ...state, rates: { vehicles: { capex: 1000, opex: 10 } } });
+  const v = user.sizing.lines.find((l) => l.id === 'vehicles');
   assert.equal(v.rate.source, 'user');
+  assert.equal(v.capex_total, 1000 * v.units.value);
+  assert.equal(v.capex_range, null, 'a user rate has no engineer range');
 });
 
 test('sizing bridge by hand: a town of 10,000 households, half on leaking septic tanks', () => {

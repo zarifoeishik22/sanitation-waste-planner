@@ -27,6 +27,33 @@ export function defaultRate(itemIds, costsById) {
   return { capex, opex, usable, hint: !usable };
 }
 
+/**
+ * Rate for a line from the engineer's unit costs (data/unit_costs.json). Converts a price per unit serving N users into a price per
+ * household with the town's household size, and a price per plant into a price per m3 a day with the reference capacity rule.
+ * Returns null when the engineer's sheet does not price the line.
+ */
+export function engineerRate(line, unitCosts, pph, rules) {
+  if (!unitCosts) return null;
+  const m = unitCosts.lines[line.id] || unitCosts.lines[line.kind];
+  if (!m) return null;
+  const byId = Object.fromEntries(unitCosts.items.map((i) => [i.id, i]));
+  if (m.included) return { capex: 0, opex: 0, low: 0, high: 0, included: true, items: m.items, note: m.note };
+  if (!m.priced) return { capex: null, opex: null, items: m.items, note: m.note, blank: true };
+  const sum = (k) => m.items.reduce((a, i) => a + (byId[i][k] || 0), 0);
+  let f = 1;
+  if (m.per === 'household' && (m.users || m.users_rule)) {
+    const users = m.users_rule ? rules[m.users_rule] : m.users;
+    if (!num(pph) || !num(users) || users <= 0) return null;
+    f = pph / users;
+  } else if (m.per === 'm3_day' && m.ref_rule) {
+    f = 1 / rules[m.ref_rule];
+  } else if (m.per === 'm3_day' && m.users) {
+    f = 1 / ((m.users * rules.wastewater_l_cap_day) / 1000);
+  }
+  return { capex: sum('typical') * f, low: sum('low') * f, high: sum('high') * f, opex: sum('om_year') * f, items: m.items, note: m.note,
+    years: [...new Set(m.items.map((i) => byId[i].price_year).filter(Boolean))] };
+}
+
 /** The levels a "full fix" is sized for. */
 export function fullLevels(wv) {
   return { uptake: 1, treat: 1, collection: wv ? Math.max(wv.collected_share, 0.9) : null, controlled: wv ? 1 : null, compost: Boolean(wv && wv.organic_share) };
@@ -36,7 +63,7 @@ export function fullLevels(wv) {
  * r = plan() result; wv = wfdView() or null; levels = { uptake, treat, collection, controlled, compost }.
  * rules = ruleValues(); costs = cost items; optionsById = rules.options by id; rates = user's { lineId: { capex, opex } }.
  */
-export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {}, existing = {} }) {
+export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {}, existing = {}, unitCosts = null }) {
   const costsById = Object.fromEntries(costs.items.map((i) => [i.id, i]));
   const optById = Object.fromEntries(ruleOptions.map((o) => [o.id, o]));
   const lines = [];
@@ -44,16 +71,23 @@ export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {
     // What the municipality already runs (workbook tier 2) is taken off the need; the line stays so the plan shows it is covered.
     const have = num(existing[line0.id]) ? existing[line0.id] : null;
     const line = have === null ? line0 : { ...line0, units: { ...line0.units, need: line0.units.value, existing: have, value: Math.max(0, Math.round((line0.units.value - have) * 10) / 10) } };
+    // Rate order: the user's figure, then the engineer's unit costs, then a reviewed (REAL) draft item. Draft items are hints only.
+    const eng = engineerRate(line, unitCosts, pph, rules);
+    const engOk = eng && num(eng.capex);
     const def = defaultRate(line.items, costsById);
     const user = rates[line.id] || {};
-    const capex = num(user.capex) ? user.capex : def.usable ? def.capex : null;
-    const opex = num(user.opex) ? user.opex : def.usable ? def.opex : null;
-    const source = num(user.capex) || num(user.opex) ? 'user' : def.usable ? 'reviewed' : 'none';
-    lines.push({ ...line, rate: { capex, opex, source, hint_capex: def.hint ? def.capex : null, hint_opex: def.hint ? def.opex : null },
+    const userSet = num(user.capex) || num(user.opex);
+    const capex = num(user.capex) ? user.capex : engOk ? eng.capex : def.usable ? def.capex : null;
+    const opex = num(user.opex) ? user.opex : engOk ? eng.opex : def.usable ? def.opex : null;
+    const source = userSet ? 'user' : engOk ? (eng.included ? 'included' : 'engineer') : def.usable ? 'reviewed' : 'none';
+    const range = !userSet && engOk && !line.unsized ? { low: eng.low * line.units.value, high: eng.high * line.units.value } : null;
+    lines.push({ ...line, rate: { capex, opex, source, low: engOk ? eng.low : null, high: engOk ? eng.high : null, note: eng ? eng.note : null, eng_items: eng ? eng.items : [], price_years: eng && eng.years ? eng.years : [],
+      hint_capex: !engOk && def.hint ? def.capex : null, hint_opex: !engOk && def.hint ? def.opex : null },
       capex_total: capex === null || line.unsized ? null : capex * line.units.value,
-      opex_total: opex === null || line.unsized ? null : opex * line.units.value });
+      opex_total: opex === null || line.unsized ? null : opex * line.units.value,
+      capex_range: range });
   };
-  const pph = r ? r.households.persons_per_household : null;
+  const pph = r ? r.households.persons_per_household : (wv && num(wv.persons_per_household) ? wv.persons_per_household : null);
   const uptake = Math.min(1, Math.max(0, levels.uptake || 0));
   const treat = Math.min(1, Math.max(0, levels.treat || 0));
 
@@ -108,6 +142,12 @@ export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {
       rule: { key: 'fstp', ids: ['empty_interval_years', 'volume_per_emptying_m3', 'working_days'] }, units: { value: Math.round(perDay * 10) / 10, unit: 'm3_day' }, rate_unit: 'm3_day', items: ['C12'] });
     add({ id: 'beds', domain: 'sanitation', kind: 'beds', name: null, deficit: { value: Math.round(volume * rules.sludge_ts_kg_m3), unit: 'kg_ts_year', ...common },
       rule: { key: 'beds', ids: ['sludge_ts_kg_m3', 'drying_bed_loading'] }, units: { value: Math.round(beds), unit: 'm2' }, rate_unit: 'm2', items: ['C34'] });
+    // Land for the plant, from the capacity still to build (after what exists).
+    const plant = lines.find((l) => l.id === 'fstp');
+    if (plant && plant.units.value > 0) {
+      add({ id: 'land', domain: 'sanitation', kind: 'land', name: null, deficit: { value: plant.units.value, unit: 'm3_day' },
+        rule: { key: 'land', ids: ['land_decimals_per_m3_day'] }, units: { value: Math.ceil(plant.units.value * rules.land_decimals_per_m3_day), unit: 'decimals' }, rate_unit: 'decimal', items: ['C35'] });
+    }
   }
   }
 
@@ -119,6 +159,11 @@ export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {
       const extra = wv.msw_t_day * (c1 - c0);
       add({ id: 'collection', domain: 'waste', kind: 'collection', name: null, deficit: { value: Math.round(extra * 10) / 10, unit: 't_day', from: c0, to: c1 },
         rule: { key: 'collection', ids: ['collection_vehicle_t_day'] }, units: { value: Math.max(1, Math.ceil(extra / rules.collection_vehicle_t_day)), unit: 'vans' }, rate_unit: 'van', items: ['S03'] });
+      const hh = r ? r.households.households : null;
+      if (num(hh)) {
+        add({ id: 'bins', domain: 'waste', kind: 'bins', name: null, deficit: { value: Math.round(hh * (c1 - c0)), unit: 'households', from: c0, to: c1 },
+          rule: { key: 'bins', ids: [] }, units: { value: Math.round(hh * (c1 - c0)), unit: 'households' }, rate_unit: 'household', items: ['S01'] });
+      }
     }
     if (levels.compost && num(wv.organic_share) && wv.organic_share > 0) {
       const atPlant = wv.msw_t_day * c1 * wv.organic_share * rules.organic_capture;
@@ -142,6 +187,9 @@ export function sizeBridge({ r, wv, levels, rules, costs, ruleOptions, rates = {
     lines, levels: { uptake, treat, collection: levels.collection ?? null, controlled: levels.controlled ?? null, compost: Boolean(levels.compost) },
     persons_per_household: pph,
     totals: { capex: priced.reduce((a, l) => a + (l.capex_total || 0), 0), opex: priced.reduce((a, l) => a + (l.opex_total || 0), 0),
+      capex_low: priced.reduce((a, l) => a + (l.capex_range ? l.capex_range.low : l.capex_total || 0), 0),
+      capex_high: priced.reduce((a, l) => a + (l.capex_range ? l.capex_range.high : l.capex_total || 0), 0),
+      any_engineer: priced.some((l) => l.rate.source === 'engineer'),
       priced: priced.length, unpriced: lines.length - priced.length, any_user: lines.some((l) => l.rate.source === 'user') },
   };
 }

@@ -37,8 +37,8 @@ export function costLines(rules) {
   const names = [...new Set(rules.options.map((o) => o.name))].filter((n) => !/emptying/i.test(n));
   return [
     ...names.map((n) => ({ id: `contain:${n}`, unit: 'household' })),
-    { id: 'shared_treatment', unit: 'm3_day' }, { id: 'vehicles', unit: 'vehicle' }, { id: 'fstp', unit: 'm3_day' }, { id: 'beds', unit: 'm2' },
-    { id: 'collection', unit: 'van' }, { id: 'compost', unit: 't_day_capacity' },
+    { id: 'shared_treatment', unit: 'm3_day' }, { id: 'vehicles', unit: 'vehicle' }, { id: 'fstp', unit: 'm3_day' }, { id: 'beds', unit: 'm2' }, { id: 'land', unit: 'decimal' },
+    { id: 'collection', unit: 'van' }, { id: 'bins', unit: 'household' }, { id: 'compost', unit: 't_day_capacity' },
   ];
 }
 
@@ -88,11 +88,12 @@ export function templateSheets({ t, sysIdx, rules, sizing, v = {}, wfdFields, ti
   for (const w of (v.wards && v.wards.length ? v.wards : Array.from({ length: 9 }, (_, i) => ({ ward: `Ward ${i + 1}` })))) {
     wards.push([inp(w.ward), inp(w.population ?? null), inp(w.households ?? null), inp(w.low_income_pct ?? null)]);
   }
-  const costs = [head(['Item', 'Unit', 'Build cost per unit', 'Running cost per unit a year', 'Year of price', 'Source of price', 'Responsible', 'key'])];
+  const costs = [head(['Item', 'Unit', 'Build cost per unit', 'Running cost per unit a year', 'Year of price', 'Source of price', 'Responsible', 'key', 'Planner default if blank'])];
   for (const c of costLines(rules)) {
     const r = rates[c.id] || {};
     const name = c.id.startsWith('contain:') ? t(`opt.${c.id.slice(8)}`) : t(`line.${c.id}`);
-    costs.push([name, t(`per.${c.unit}`), inp(r.capex ?? null), inp(r.opex ?? null), inp(r.year ?? null), inp(r.source ?? null), inp(r.owner ?? null), note(c.id)]);
+    const dflt = v.defaults && v.defaults[c.id];
+    costs.push([name, t(`per.${c.unit}`), inp(r.capex ?? null), inp(r.opex ?? null), inp(r.year ?? null), inp(r.source ?? null), inp(r.owner ?? null), note(c.id), note(dflt || '')]);
   }
   const rulesRows = [head(['Sizing rule', 'Value', 'Unit', 'Planner default', 'Default is', 'key']),
     ...sizing.rules.map((x) => [x.label, inp(ro[x.id] ?? null), x.unit, x.value, x.status === 'CITED' ? 'cited' : 'assumption', note(x.id)])];
@@ -108,7 +109,7 @@ export function templateSheets({ t, sysIdx, rules, sizing, v = {}, wfdFields, ti
     { name: 'WFD', widths: [46, 16, 22], rows: wfd, freeze: true },
     { name: 'Operations', widths: [50, 16, 16, 24], rows: opsRows, freeze: true },
     { name: 'Wards', widths: [20, 14, 14, 20], rows: wards, freeze: true },
-    { name: 'Costs', widths: [44, 26, 18, 22, 12, 30, 20, 34], rows: costs, freeze: true },
+    { name: 'Costs', widths: [44, 26, 18, 22, 12, 30, 20, 34, 60], rows: costs, freeze: true },
     { name: 'Sizing rules', widths: [60, 12, 30, 14, 12, 26], rows: rulesRows, freeze: true },
     { name: 'Governance', widths: [70, 14, 12, 18], rows: govRows, freeze: true },
     { name: 'Scenarios', widths: [20, 20, 18, 16, 20, 18], rows: scen, freeze: true },

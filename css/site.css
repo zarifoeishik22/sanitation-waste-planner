@@ -492,3 +492,8 @@ path.sk-c-yes, path.sk-c-no, path.sk-n { fill: #9fb0aa; }
   .strips { grid-template-columns: repeat(3, 1fr); }
   a { color: inherit; text-decoration: none; }
 }
+
+/* engineer's unit costs */
+.rate-note { flex-basis: 100%; margin-top: 6px; font-size: 13px; color: var(--ink-2); max-width: 80ch; }
+.tbl tr.dim th, .tbl tr.dim td { color: var(--ink-2); }
+.tbl .src { display: block; font-size: 12.5px; color: var(--ink-2); font-weight: 400; }

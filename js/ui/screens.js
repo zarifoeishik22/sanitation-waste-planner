@@ -336,7 +336,8 @@ function report(ctx) {
       <p class="rp-meta">${esc(t('rp.meta', { name: a.name, from: startYear, to: startYear + planYears - 1, date: today }))}</p><p class="rp-meta">${esc(basisLine(ctx))}</p></header>
     <section><h3>${esc(t('rp.s1'))}</h3>${sum.map((x) => `<p>${esc(x)}</p>`).join('')}
       <p>${esc(a.any ? t('rp.s1_plan', { name: a.name, safe: a.safe === null ? '–' : pct(a.safe), plastic: a.plastic === null ? '–' : int(a.plastic) }) : t('rp.s1_noplan'))}</p>
-      <p>${esc(sizing.totals.priced ? t('rp.s1_cost', { capex: money(ctx, sizing.totals.capex), priced: sizing.totals.priced, total: sizing.lines.filter((l) => !l.unsized).length }) : t('rp.s1_nocost'))}</p></section>
+      <p>${esc(sizing.totals.priced ? t('rp.s1_cost', { capex: money(ctx, sizing.totals.capex), priced: sizing.totals.priced, total: sizing.lines.filter((l) => !l.unsized).length }) : t('rp.s1_nocost'))}</p>
+      ${sizing.totals.any_engineer && sizing.totals.capex > 0 ? `<p>${esc(t('rp.s1_range', { low: money(ctx, sizing.totals.capex_low), high: money(ctx, sizing.totals.capex_high), household: pct(sizing.lines.filter((l) => l.kind === 'contain').reduce((x, l) => x + (l.capex_total || 0), 0) / sizing.totals.capex) }))}</p>` : ''}</section>
     <section><h3>${esc(t('rp.s2'))}</h3><div class="two">${c.san ? chainBars({ cls: 'san', aria: t('chain.san'), stages: [{ label: t('chain.contained'), value: c.san.contained }, { label: t('chain.emptied'), value: c.san.emptied }, { label: t('chain.treated'), value: c.san.treated }, { label: t('chain.safe'), value: c.san.safe }] }) : ''}
       ${c.waste ? chainBars({ cls: 'waste', aria: t('chain.waste'), stages: [{ label: t('chain.collected'), value: c.waste.collected }, { label: t('chain.recovered'), value: c.waste.recovered }, { label: t('chain.controlled'), value: c.waste.controlled }] }) : ''}</div></section>
     <section><h3>${esc(t('rp.s3'))}</h3><ol class="rp-list">${ins.filter((i) => i.kind !== 'missing').slice(0, 5).map((i) => { const x = insightText(i, ctx); return `<li><strong>${esc(x.title)}</strong> ${esc(x.body)}</li>`; }).join('')}</ol></section>
@@ -364,7 +365,23 @@ function data(ctx) {
       <p class="fine">${esc(t('wb.note'))}</p><div class="runfile"><button type="button" class="link" data-act="save-run">${esc(t('run.save'))}</button>
       <label class="link">${esc(t('run.load'))}<input type="file" class="visually-hidden" accept="application/json,.json" data-act="load-run"></label><span id="run-msg" class="fine">${esc(state.runMsg || '')}</span></div>`)}</div>
     ${ops || wards ? panel(t('ops.h'), `${ops ? `<dl class="facts">${ops}</dl>` : ''}${wards}`) : ''}
+    ${unitCostsPanel(ctx)}
     ${evidenceSection(ctx)}`;
+}
+
+function unitCostsPanel(ctx) {
+  const { t, d } = ctx;
+  const uc = d.unit_costs;
+  if (!uc) return '';
+  const usedBy = {};
+  for (const [lid, m] of Object.entries(uc.lines)) if (m.priced || m.included) for (const i of m.items) (usedBy[i] = usedBy[i] || []).push(lid.startsWith('contain:') ? t(`opt.${lid.slice(8)}`) : t(`line.${lid}`));
+  const priced = uc.items.filter((i) => i.priced).length;
+  const rows = uc.items.map((i) => {
+    const use = usedBy[i.id] ? t('uc.used', { lines: [...new Set(usedBy[i.id])].join('; ') }) : !i.priced ? t('uc.blank') : uc.unused[i.id] || (uc.lines.compost && uc.lines.compost.items.includes(i.id) ? uc.lines.compost.note : '');
+    return `<tr${usedBy[i.id] ? '' : ' class="dim"'}><td>${esc(i.id)}</td><th scope="row">${esc(i.item)}<span class="src">${esc([i.unit, i.spec].filter(Boolean).join('. '))}</span></th>
+      <td class="num">${i.priced ? esc(int(i.typical)) : '–'}</td><td class="num">${esc(i.price_year || '–')}</td><td>${esc(use)}</td></tr>`;
+  }).join('');
+  return panel(t('uc.h'), `<p>${esc(t('uc.lede', { priced, rows: uc.items.length }))}</p><div class="table-wrap tall"><table class="tbl"><thead><tr><th scope="col">${esc(t('uc.col_id'))}</th><th scope="col">${esc(t('uc.col_item'))}</th><th scope="col" class="num">${esc(t('uc.col_typ'))}</th><th scope="col" class="num">${esc(t('uc.col_year'))}</th><th scope="col">${esc(t('uc.col_use'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`, 'p-wide');
 }
 
 /* ---------- import (inside the shell) ---------- */

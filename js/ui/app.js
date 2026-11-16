@@ -8,7 +8,7 @@ import { renderLanding, renderCheck, shareTotal, bridgeBlock, totalsBlock, lineT
 import { renderShell, ROUTE_IDS, scenarioResults, phaseBlock } from './screens.js';
 
 const $ = (sel) => document.querySelector(sel);
-const FILES = ['towns', 'sfd', 'wfd', 'rules', 'costs', 'params', 'benchmarks', 'sizing', 'pubindex', 'strings.en'];
+const FILES = ['towns', 'sfd', 'wfd', 'rules', 'costs', 'params', 'benchmarks', 'sizing', 'pubindex', 'unit_costs', 'strings.en'];
 const MAX_FILE = 30 * 1024 * 1024;
 const r2 = (v) => String(Math.round(v * 100) / 100);
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'town';
@@ -244,7 +244,12 @@ function start(d) {
   async function exportBook(blank = false) {
     const { writeWorkbook } = await import('../xlsx/workbook.js');
     if (!blank) saveActive();
-    const v = blank ? {} : { form: currentForm(), ops: { ...state.ops, currency: state.currency || state.ops.currency }, wards: state.wards, gov: state.gov, rates: state.rates, ruleOverrides: state.ruleOverrides, scenarios: state.scen };
+    const defaults = {};
+    if (!blank) for (const l of [...ctx.full.lines, ...ctx.sizing.lines]) {
+      if (l.rate.source === 'engineer' || (l.rate.source === 'user' && l.rate.low !== null)) defaults[l.id] = `Engineer's sheet (${l.rate.eng_items.join(' + ')}): ${Math.round(l.rate.low)} to ${Math.round(l.rate.high)} ${t(`per.${l.rate_unit}`)} for this town`;
+      else if (l.rate.source === 'included') defaults[l.id] = 'Included in the treatment plant price';
+    }
+    const v = blank ? {} : { defaults, form: currentForm(), ops: { ...state.ops, currency: state.currency || state.ops.currency }, wards: state.wards, gov: state.gov, rates: state.rates, ruleOverrides: state.ruleOverrides, scenarios: state.scen };
     const sheets = templateSheets({ t, sysIdx, rules: d.rules, sizing: d.sizing, v, wfdFields: WFD_FIELDS, title: blank ? '' : ctx.town.name });
     download(writeWorkbook(sheets), blank ? 'planner-workbook-blank.xlsx' : `planner-workbook-${slug(ctx.town.name)}-${today}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }

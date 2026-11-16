@@ -121,7 +121,7 @@ export function completeness({ r, wv, ops = {}, wards = [], gov = {}, rates = {}
   };
 }
 
-const PHASE = { vehicles: [0, 2], collection: [0, 2], fstp: [1, 3], beds: [1, 3], compost: [1, 3], shared_treatment: [2, 3], disposal: [1, 3] };
+const PHASE = { land: [0, 1], bins: [0, 2], vehicles: [0, 2], collection: [0, 2], fstp: [1, 3], beds: [1, 3], compost: [1, 3], shared_treatment: [2, 3], disposal: [1, 3] };
 
 /** When each line is built: { lineId: { start (years from plan start), years } }, user choices over the defaults. Spend per year. */
 export function phasing(lines, planYears, chosen = {}) {

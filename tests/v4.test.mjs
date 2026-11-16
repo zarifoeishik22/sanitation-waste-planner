@@ -11,7 +11,7 @@ import { writeWorkbook, readWorkbook } from '../js/xlsx/workbook.js';
 import { phasing } from '../js/engine/analysis.js';
 
 const d = { towns: load('towns.json'), sfd: load('sfd.json'), wfd: load('wfd.json'), rules: load('rules.json'), costs: load('costs.json'), params: load('params.json'),
-  benchmarks: load('benchmarks.json'), sizing: load('sizing.json'), pubindex: load('pubindex.json'), strings: load('strings.en.json') };
+  benchmarks: load('benchmarks.json'), sizing: load('sizing.json'), pubindex: load('pubindex.json'), unit_costs: load('unit_costs.json'), strings: load('strings.en.json') };
 const sysIdx = systemIndex(d.rules);
 const missing = new Set();
 const base = makeT(d.strings);
@@ -104,4 +104,18 @@ test('a blank workbook reads back as empty, not as zeros', async () => {
   assert.deepEqual(r.ops, {});
   assert.deepEqual(r.rates, {});
   assert.deepEqual(r.tiers, { 1: [], 2: [], 3: [] });
+});
+
+test("engineer's prices: conversions per household and per m3 a day are as stated", () => {
+  const c = ctxOf({ townId: id('Kaliakair') });
+  const pph = c.r.households.persons_per_household;
+  const L = (lid) => c.full.lines.find((l) => l.id === lid);
+  const uc = Object.fromEntries(d.unit_costs.items.map((i) => [i.id, i]));
+  assert.ok(Math.abs(L('contain:New septic tank with soak pit').rate.capex - (uc.C07.typical + uc.C21.typical) * pph / 12.5) < 1e-6);
+  assert.ok(Math.abs(L('contain:Convert dug hole to VIP latrine').rate.capex - uc.C05.typical * pph / 5) < 1e-6);
+  assert.equal(L('fstp').rate.capex, uc.C12.typical / 25);
+  assert.equal(L('vehicles').rate.capex, uc.C30.typical);
+  assert.equal(L('beds').rate.source, 'included');
+  assert.equal(L('land').units.value, Math.ceil(L('fstp').units.value * 3.6));
+  assert.equal(c.currency, 'BDT');
 });

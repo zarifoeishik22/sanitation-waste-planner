@@ -130,7 +130,7 @@ export function buildContext(d, state, t, today = '') {
   const fl = flags({ town, r, wv, excreta: ex0, plastic: pl0, paired: useBangladeshPeers ? paired : null, meta, portal, today });
 
   const rules = ruleValues(d.sizing, state.ruleOverrides);
-  const sizeArgs = { r, wv, rules, costs: d.costs, ruleOptions: d.rules.options, rates: state.rates, existing: existingOf(state.ops) };
+  const sizeArgs = { r, wv, rules, costs: d.costs, ruleOptions: d.rules.options, rates: state.rates, existing: existingOf(state.ops), unitCosts: d.unit_costs || null };
   const full = sizeBridge({ ...sizeArgs, levels: fullLevels(wv) });
   const sizing = touched ? sizeBridge({ ...sizeArgs, levels: levers }) : full;
 
@@ -159,7 +159,7 @@ export function buildContext(d, state, t, today = '') {
     return { i, name: s.name, levers: lv, any, safe: scS ? scS.safe : null, plastic: wsS ? wsS.unmanaged_after_t : null,
       drain_persons: exS ? exS.receivers.drain.persons : null, drain_tonnes: plS ? plS.receivers.drain.tonnes : null, sizing: sz };
   });
-  const currency = state.currency || state.ops.currency || '';
+  const currency = state.currency || state.ops.currency || (d.unit_costs && sizing.totals.any_engineer ? d.unit_costs.currency : '');
 
   return { chains, flows, contrib, comp, startYear, planYears, phase, insights: ins, scenarios, currency,
     d, t, state, today, town, isOwn, country, meta, sfdTown, wfdTown, sysIdx, r, wv, levers, touched, sc, ws, ex0, ex1, pl0, pl1, dec, verdict: v, flags: fl,

@@ -1,6 +1,6 @@
 // Offline copy of the planner's own files. Network first: when online the newest version is always used and stored;
 // when offline the stored copy answers. Only same-origin GET requests are handled; nothing the user types is stored.
-const CACHE = 'planner-v0.4';
+const CACHE = 'planner-v0.4.1';
 // Every file the page can ask for, so the tool works offline after one visit (tests/offline.test.mjs keeps this list complete).
 const PRECACHE = [
  "./",
@@ -39,6 +39,7 @@ const PRECACHE = [
  "data/rules.json",
  "data/sfd.json",
  "data/sizing.json",
+ "data/unit_costs.json",
  "data/strings.en.json",
  "data/towns.json",
  "data/wfd.json",

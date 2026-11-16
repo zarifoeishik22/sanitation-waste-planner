@@ -311,7 +311,7 @@ export function sandboxSection(ctx) {
 
 /* ----- the sizing bridge ----- */
 
-const UNIT = { households: 'u.households', people: 'u.people', vehicles: 'u.vehicles', m3_day: 'u.m3_day', m3_year: 'u.m3_year', kg_ts_year: 'u.kg_ts_year', m2: 'u.m2', vans: 'u.vans', t_day: 'u.t_day', t_day_capacity: 'u.t_day_capacity' };
+const UNIT = { households: 'u.households', people: 'u.people', vehicles: 'u.vehicles', m3_day: 'u.m3_day', m3_year: 'u.m3_year', kg_ts_year: 'u.kg_ts_year', m2: 'u.m2', vans: 'u.vans', t_day: 'u.t_day', t_day_capacity: 'u.t_day_capacity', decimals: 'u.decimals' };
 
 function lineText(l, ctx) {
   const { t, rules, d } = ctx;
@@ -328,10 +328,12 @@ function lineText(l, ctx) {
   else if (l.kind === 'collection') { deficit = t('line.collection_def', { n: qty(dv.value), from: pct(dv.from), to: pct(dv.to) }); rule = t('rule.collection', { t: rules.collection_vehicle_t_day }); }
   else if (l.kind === 'compost') { deficit = t('line.compost_def', { n: qty(dv.value), share: pct(dv.organic) }); rule = t('rule.compost', { capture: pct(rules.organic_capture), at: qty(dv.at_plant), mod: rules.compost_module_t_day, yield: rules.compost_yield });
     units = t('line.compost_units', { modules: l.units.modules, cap: int(l.units.value), compost: qty(l.units.compost_t_day) }); }
+  else if (l.kind === 'land') { deficit = t('line.land_def', { n: qty(dv.value) }); rule = t('rule.land', { per: rules.land_decimals_per_m3_day }); units = `${int(l.units.value)} ${u('decimals')}`; }
+  else if (l.kind === 'bins') { deficit = t('line.bins_def', { n: int(dv.value), from: pct(dv.from), to: pct(dv.to) }); rule = t('rule.bins'); units = `${int(l.units.value)} ${u('households')}`; }
   else { deficit = t('line.disposal_def', { n: qty(dv.value) }); rule = t('rule.none'); units = t('line.unsized'); }
   if (l.units.existing !== undefined) units = t(l.units.value > 0 ? 'line.after_existing' : 'line.covered', { units, need: qty(l.units.need), have: qty(l.units.existing) });
   const statuses = l.rule.ids.map((id) => d.sizing.rules.find((x) => x.id === id).status);
-  const tag = l.kind === 'contain' || !statuses.length ? (l.kind === 'disposal' ? null : 'assumption') : statuses.every((s) => s === 'CITED') ? 'cited' : statuses.some((s) => s === 'CITED') ? 'mixed' : 'assumption';
+  const tag = l.kind === 'land' ? 'cited' : l.kind === 'contain' || l.kind === 'bins' || !statuses.length ? (l.kind === 'disposal' ? null : 'assumption') : statuses.every((s) => s === 'CITED') ? 'cited' : statuses.some((s) => s === 'CITED') ? 'mixed' : 'assumption';
   return { title, deficit, rule, units, tag };
 }
 
@@ -340,7 +342,8 @@ export function lineTotals(l, ctx) {
   if (l.unsized) return `<span class="none">${esc(t('line.unsized'))}</span>`;
   if (l.capex_total === null && l.opex_total === null) return `<span class="none">${esc(t('line.no_rate'))}</span>`;
   const cur = ctx.currency ? `${ctx.currency} ` : '';
-  return `${l.capex_total !== null ? `<span class="num big">${esc(cur)}${int(l.capex_total)}</span>` : ''}${l.opex_total !== null && l.opex_total > 0 ? `<span class="per-year">${esc(t('line.per_year', { n: `${cur}${int(l.opex_total)}` }))}</span>` : ''}
+  const range = l.capex_range && l.capex_range.high > l.capex_range.low ? `<span class="per-year">${esc(`${cur}${int(l.capex_range.low)} to ${int(l.capex_range.high)}`)}</span>` : '';
+  return `${l.capex_total !== null ? `<span class="num big">${esc(cur)}${int(l.capex_total)}</span>` : ''}${range}${l.opex_total !== null && l.opex_total > 0 ? `<span class="per-year">${esc(t('line.per_year', { n: `${cur}${int(l.opex_total)}` }))}</span>` : ''}
     <span class="tag tag-${l.rate.source}">${esc(t(`rate.${l.rate.source}`))}</span>`;
 }
 
@@ -348,11 +351,15 @@ function bridgeLine(l, ctx) {
   const { t, state } = ctx;
   const x = lineText(l, ctx);
   const user = state.rates[l.id] || {};
-  const hint = (v) => (v !== null && v > 0 ? ` placeholder="${esc(t('rate.hint', { n: int(v) }))}"` : '');
+  const eng = l.rate.source === 'engineer' || l.rate.source === 'included' || (l.rate.source === 'user' && l.rate.low !== null);
+  const hint = (v, k) => (eng && l.rate.source !== 'user' ? ` placeholder="${esc(t('rate.eng_hint', { n: int(l.rate[k] || 0) }))}"` : v !== null && v > 0 ? ` placeholder="${esc(t('rate.hint', { n: int(v) }))}"` : '');
   const val = (k) => (user[k] !== undefined && user[k] !== null ? user[k] : l.rate.source === 'reviewed' && l.rate[k] !== null ? l.rate[k] : '');
   const rates = l.unsized ? `<span class="none">${esc(t('line.unsized'))}</span>` : `
-      <label class="rate"><span>${esc(t('rate.capex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="capex" data-line="${esc(l.id)}" value="${esc(val('capex'))}"${hint(l.rate.hint_capex)}></label>
-      <label class="rate"><span>${esc(t('rate.opex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="opex" data-line="${esc(l.id)}" value="${esc(val('opex'))}"${hint(l.rate.hint_opex)}></label>`;
+      <label class="rate"><span>${esc(t('rate.capex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="capex" data-line="${esc(l.id)}" value="${esc(val('capex'))}"${hint(l.rate.hint_capex, 'capex')}></label>
+      <label class="rate"><span>${esc(t('rate.opex', { unit: t(`per.${l.rate_unit}`) }))}</span><input type="text" inputmode="decimal" autocomplete="off" data-rate="opex" data-line="${esc(l.id)}" value="${esc(val('opex'))}"${hint(l.rate.hint_opex, 'opex')}></label>
+      ${l.rate.note ? `<p class="rate-note">${esc(l.rate.low !== null && l.rate.low !== undefined && !(l.rate.source === 'included')
+    ? t('rate.eng_note', { items: l.rate.eng_items.join(' + '), years: l.rate.price_years.join(', ') || t('rate.no_year'), low: int(l.rate.low), high: int(l.rate.high), typ: int(l.rate.source === 'user' ? (l.rate.low + l.rate.high) / 2 : l.rate.capex), unit: t(`per.${l.rate_unit}`), note: l.rate.note })
+    : t('rate.eng_blank', { note: l.rate.note }))}</p>` : ''}`;
   return `<article class="line line-${l.domain}"><h3>${esc(x.title)}</h3>
     <ol class="bridge">
       <li><span class="k">${esc(t('br.deficit'))}</span><span class="v">${esc(x.deficit)}</span></li>
@@ -369,9 +376,12 @@ export function totalsBlock(ctx) {
   if (!sizing.lines.length) return '';
   if (!tt.priced) return `<p class="totals totals-none">${esc(t('tot.none'))}</p>`;
   const cur = ctx.currency ? `${ctx.currency} ` : '';
+  const hh = sizing.lines.filter((l) => l.kind === 'contain').reduce((a, l) => a + (l.capex_total || 0), 0);
   return `<p class="totals"><span class="tot-k">${esc(t('tot.capex'))}</span> <span class="num big">${esc(cur)}${int(tt.capex)}</span>
     ${tt.opex > 0 ? `<span class="tot-k">${esc(t('tot.opex'))}</span> <span class="num big">${esc(cur)}${int(tt.opex)}</span>` : ''}
-    <span class="tot-note">${esc(t(tt.unpriced ? 'tot.partial' : 'tot.all', { priced: tt.priced, total: tt.priced + tt.unpriced }))}</span></p>`;
+    <span class="tot-note">${esc(t(tt.unpriced ? 'tot.partial' : 'tot.all', { priced: tt.priced, total: tt.priced + tt.unpriced }))}</span>
+    ${tt.any_engineer && tt.capex_high > tt.capex_low ? `<span class="tot-note">${esc(t('tot.range', { low: `${cur}${int(tt.capex_low)}`, high: `${cur}${int(tt.capex_high)}` }))}</span>` : ''}
+    ${hh > 0 && tt.capex > 0 ? `<span class="tot-note">${esc(t('tot.household', { n: `${cur}${int(hh)}`, share: pct(hh / tt.capex) }))}</span>` : ''}</p>`;
 }
 
 export function bridgeBlock(ctx) {
