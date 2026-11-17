@@ -1,22 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="description" content="Draft planning tool. Reads a town's excreta flow diagram (SFD) and waste flow diagram (WFD) together and sizes what to build. Runs in the browser; files are not uploaded.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self' https://tile.openstreetmap.org https://nominatim.openstreetmap.org; worker-src 'self' blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="description" content="Draft planning wizard. Pick a town, read its excreta flow diagram (SFD) and waste flow diagram (WFD), answer ten questions and leave with a costed, phased sanitation and waste plan.">
 <title>Sanitation and waste planner (draft)</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/site.css">
+  <script type="module" crossorigin src="./assets/index-BJcMj2AF.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/charts-JjsGLO1V.js">
+  <link rel="modulepreload" crossorigin href="./assets/map-CyQPo1wO.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-BNws1ii3.css">
 </head>
 <body>
-<header class="masthead">
-  <a class="wordmark" href="./" data-i18n="app.title">Sanitation and waste planner</a>
-  <p class="tagline" data-i18n="app.tag">From an SFD and a WFD to what to build</p>
-</header>
-<main id="app" tabindex="-1"><p class="loading" data-i18n="app.loading">Loading…</p></main>
-<footer class="foot" id="foot"></footer>
-<script type="module" src="js/ui/app.js"></script>
+<div id="root"><p class="loading">Loading the planner…</p></div>
 </body>
 </html>

@@ -1,0 +1,572 @@
+{
+ "note": "Approximate town positions for the map. Each is the centre of the sub-district the town sits in, or the town itself where GeoNames lists it. Derived from OpenStreetMap-based boundaries (github.com/ifahimreza/bangladesh-geojson, ODbL) and GeoNames (CC BY 4.0). Town-level only: no household or facility positions.",
+ "towns": {
+  "Kaliakair": {
+   "centre": [
+    90.2645,
+    24.1033
+   ],
+   "district": "Gazipur",
+   "basis": "sub-district"
+  },
+  "Bauphal": {
+   "centre": [
+    90.5384,
+    22.433
+   ],
+   "district": "Patuakhali",
+   "basis": "sub-district"
+  },
+  "Galachipa": {
+   "centre": [
+    90.423,
+    22.2031
+   ],
+   "district": "Patuakhali",
+   "basis": "sub-district"
+  },
+  "Paikgachha": {
+   "centre": [
+    89.3403,
+    22.5906
+   ],
+   "district": "Khulna",
+   "basis": "sub-district"
+  },
+  "Betagi": {
+   "centre": [
+    90.1482,
+    22.3472
+   ],
+   "district": "Barguna",
+   "basis": "sub-district"
+  },
+  "Singair": {
+   "centre": [
+    90.1543,
+    23.7834
+   ],
+   "district": "Manikganj",
+   "basis": "sub-district"
+  },
+  "Sonargaon": {
+   "centre": [
+    90.6167,
+    23.65
+   ],
+   "district": "Narayanganj",
+   "basis": "town"
+  },
+  "Araihazar": {
+   "centre": [
+    90.6689,
+    23.761
+   ],
+   "district": "Narayanganj",
+   "basis": "sub-district"
+  },
+  "Sreepur": {
+   "centre": [
+    90.4431,
+    24.2052
+   ],
+   "district": "Gazipur",
+   "basis": "sub-district"
+  },
+  "Kalihati": {
+   "centre": [
+    89.9448,
+    24.36
+   ],
+   "district": "Tangail",
+   "basis": "sub-district"
+  },
+  "Laksham": {
+   "centre": [
+    91.1214,
+    23.2402
+   ],
+   "district": "Cumilla",
+   "basis": "town"
+  },
+  "Nangalkot": {
+   "centre": [
+    91.2093,
+    23.1401
+   ],
+   "district": "Cumilla",
+   "basis": "sub-district"
+  },
+  "Sonaimuri": {
+   "centre": [
+    91.0777,
+    23.0262
+   ],
+   "district": "Noakhali",
+   "basis": "sub-district"
+  },
+  "Chauddagram": {
+   "centre": [
+    91.2804,
+    23.2203
+   ],
+   "district": "Cumilla",
+   "basis": "sub-district"
+  },
+  "Hajiganj": {
+   "centre": [
+    90.8551,
+    23.2519
+   ],
+   "district": "Chandpur",
+   "basis": "town"
+  },
+  "Daudkandi": {
+   "centre": [
+    90.7731,
+    23.5027
+   ],
+   "district": "Cumilla",
+   "basis": "sub-district"
+  },
+  "Debidwar": {
+   "centre": [
+    90.9979,
+    23.5783
+   ],
+   "district": "Cumilla",
+   "basis": "sub-district"
+  },
+  "Kalkini": {
+   "centre": [
+    90.2481,
+    23.0709
+   ],
+   "district": "Madaripur",
+   "basis": "sub-district"
+  },
+  "Banaripara": {
+   "centre": [
+    90.1284,
+    22.8118
+   ],
+   "district": "Barishal",
+   "basis": "sub-district"
+  },
+  "Ishwardi": {
+   "centre": [
+    89.0972,
+    24.0778
+   ],
+   "district": "Pabna",
+   "basis": "sub-district"
+  },
+  "Shahjadpur": {
+   "centre": [
+    89.6301,
+    24.1628
+   ],
+   "district": "Sirajganj",
+   "basis": "sub-district"
+  },
+  "Goalanda": {
+   "centre": [
+    89.7661,
+    23.7564
+   ],
+   "district": "Rajbari",
+   "basis": "sub-district"
+  },
+  "Beanibazar": {
+   "centre": [
+    92.1591,
+    24.8489
+   ],
+   "district": "Sylhet",
+   "basis": "sub-district"
+  },
+  "Nagarkanda": {
+   "centre": [
+    89.8944,
+    23.4373
+   ],
+   "district": "Faridpur",
+   "basis": "sub-district"
+  },
+  "Arani": {
+   "centre": [
+    88.8283,
+    24.2004
+   ],
+   "district": "Rajshahi",
+   "basis": "sub-district"
+  },
+  "Gopalpur (Lalpur)": {
+   "centre": [
+    88.9849,
+    24.1983
+   ],
+   "district": "Natore",
+   "basis": "sub-district"
+  },
+  "Muksudpur": {
+   "centre": [
+    89.9144,
+    23.2667
+   ],
+   "district": "Gopalganj",
+   "basis": "sub-district"
+  },
+  "Shibchar": {
+   "centre": [
+    90.1742,
+    23.3754
+   ],
+   "district": "Madaripur",
+   "basis": "sub-district"
+  },
+  "Charghat": {
+   "centre": [
+    88.7754,
+    24.3001
+   ],
+   "district": "Rajshahi",
+   "basis": "sub-district"
+  },
+  "Sreemangal": {
+   "centre": [
+    91.698,
+    24.301
+   ],
+   "district": "Moulvibazar",
+   "basis": "sub-district"
+  },
+  "Kamalganj": {
+   "centre": [
+    91.8592,
+    24.3157
+   ],
+   "district": "Moulvibazar",
+   "basis": "sub-district"
+  },
+  "Bera": {
+   "centre": [
+    89.6326,
+    24.0782
+   ],
+   "district": "Pabna",
+   "basis": "town"
+  },
+  "Chhatak": {
+   "centre": [
+    91.6696,
+    25.0385
+   ],
+   "district": "Sunamganj",
+   "basis": "town"
+  },
+  "Nabiganj": {
+   "centre": [
+    91.5444,
+    24.5696
+   ],
+   "district": "Habiganj",
+   "basis": "sub-district"
+  },
+  "Raipura": {
+   "centre": [
+    90.8721,
+    23.9602
+   ],
+   "district": "Narsingdi",
+   "basis": "sub-district"
+  },
+  "Manohardi": {
+   "centre": [
+    90.7304,
+    24.1607
+   ],
+   "district": "Narsingdi",
+   "basis": "sub-district"
+  },
+  "Islampur": {
+   "centre": [
+    89.7613,
+    25.0752
+   ],
+   "district": "Jamalpur",
+   "basis": "sub-district"
+  },
+  "Karimganj": {
+   "centre": [
+    90.896,
+    24.4513
+   ],
+   "district": "Kishoreganj",
+   "basis": "sub-district"
+  },
+  "Dewanganj": {
+   "centre": [
+    89.7659,
+    25.2636
+   ],
+   "district": "Jamalpur",
+   "basis": "sub-district"
+  },
+  "Gafargaon": {
+   "centre": [
+    90.5585,
+    24.432
+   ],
+   "district": "Mymensingh",
+   "basis": "town"
+  },
+  "Muktagacha": {
+   "centre": [
+    90.257,
+    24.7648
+   ],
+   "district": "Mymensingh",
+   "basis": "town"
+  },
+  "Patgram": {
+   "centre": [
+    89.0256,
+    26.347
+   ],
+   "district": "Lalmonirhat",
+   "basis": "sub-district"
+  },
+  "Hakimpur": {
+   "centre": [
+    89.062,
+    25.2921
+   ],
+   "district": "Dinajpur",
+   "basis": "sub-district"
+  },
+  "Nageshwari": {
+   "centre": [
+    89.7401,
+    25.9585
+   ],
+   "district": "Kurigram",
+   "basis": "sub-district"
+  },
+  "Sundarganj": {
+   "centre": [
+    89.564,
+    25.51
+   ],
+   "district": "Gaibandha",
+   "basis": "sub-district"
+  },
+  "Rangunia": {
+   "centre": [
+    92.0666,
+    22.465
+   ],
+   "district": "Chattogram",
+   "basis": "sub-district"
+  },
+  "Banshkhali": {
+   "centre": [
+    91.9402,
+    22.0147
+   ],
+   "district": "Chattogram",
+   "basis": "sub-district"
+  },
+  "Satkania": {
+   "centre": [
+    92.0496,
+    22.0764
+   ],
+   "district": "Chattogram",
+   "basis": "town"
+  },
+  "Chakaria": {
+   "centre": [
+    92.0524,
+    21.7402
+   ],
+   "district": "Cox's Bazar",
+   "basis": "sub-district"
+  },
+  "Kalaroa": {
+   "centre": [
+    89.0303,
+    22.8807
+   ],
+   "district": "Satkhira",
+   "basis": "sub-district"
+  }
+ },
+ "sfd_only": [
+  [
+   "Bagerhat",
+   89.764,
+   22.682
+  ],
+  [
+   "Bandarban",
+   92.218,
+   22.173
+  ],
+  [
+   "Barguna",
+   90.108,
+   22.136
+  ],
+  [
+   "Barishal",
+   90.339,
+   22.82
+  ],
+  [
+   "Bhola",
+   90.615,
+   22.695
+  ],
+  [
+   "Bogra",
+   89.355,
+   24.891
+  ],
+  [
+   "Brahmanbaria",
+   91.116,
+   23.956
+  ],
+  [
+   "Chandpur",
+   90.684,
+   23.24
+  ],
+  [
+   "Chattogram",
+   91.835,
+   22.463
+  ],
+  [
+   "Chuadanga",
+   88.883,
+   23.595
+  ],
+  [
+   "Cox's Bazar",
+   92.036,
+   21.504
+  ],
+  [
+   "Cumilla",
+   91.008,
+   23.471
+  ],
+  [
+   "Khagrachari",
+   91.948,
+   23.177
+  ],
+  [
+   "Khulna",
+   89.567,
+   22.808
+  ],
+  [
+   "Kishoreganj",
+   89.031,
+   25.88
+  ],
+  [
+   "Kurigram",
+   89.69,
+   25.807
+  ],
+  [
+   "Kushtia",
+   89.09,
+   23.832
+  ],
+  [
+   "Lakshmipur",
+   90.861,
+   22.927
+  ],
+  [
+   "Lalmonirhat",
+   89.454,
+   25.855
+  ],
+  [
+   "Lama",
+   92.208,
+   21.82
+  ],
+  [
+   "Madaripur",
+   90.177,
+   23.202
+  ],
+  [
+   "Magura",
+   89.414,
+   23.458
+  ],
+  [
+   "Manikganj",
+   90.029,
+   23.844
+  ],
+  [
+   "Meherpur",
+   88.662,
+   23.776
+  ],
+  [
+   "Mirzapur",
+   90.108,
+   24.124
+  ],
+  [
+   "Moulvibazar",
+   91.948,
+   24.483
+  ],
+  [
+   "Munshiganj",
+   90.526,
+   23.496
+  ],
+  [
+   "Mymensingh",
+   90.359,
+   24.774
+  ],
+  [
+   "Naogaon",
+   88.898,
+   24.811
+  ],
+  [
+   "Narail",
+   89.493,
+   23.165
+  ],
+  [
+   "Narayanganj",
+   90.482,
+   23.633
+  ],
+  [
+   "Narsingdi",
+   90.708,
+   23.875
+  ],
+  [
+   "Natore",
+   88.982,
+   24.446
+  ]
+ ]
+}

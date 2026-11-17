@@ -1,7 +1,9 @@
 """Guard: fail if the repository holds anything it must never hold.
 
-Public repository rule: town-level aggregates only. No household records, coordinates,
+Public repository rule: town-level aggregates only. No household records, household or facility coordinates,
 personal identifiers, source masters or copyrighted WFD portal reports.
+The one spatial file allowed is data/places.json: one approximate point per town (the centre of its sub-district,
+from public OpenStreetMap-derived boundaries), under the key "centre". Built files (index.html, assets/) are generated.
 
 Usage: python scripts/check_repo.py   (run in CI on every push)
 """
@@ -19,7 +21,8 @@ MAX_ROWS = 400  # a list longer than this in a data file would be record-level, 
 
 problems = []
 files = subprocess.run(['git', 'ls-files', '--cached', '--others', '--exclude-standard'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
-files = [f for f in files if f]
+# The built bundle and the lock file are generated; minified code is not scanned for phone-like digit runs.
+files = [f for f in files if f and not f.startswith('assets/') and f != 'package-lock.json']
 
 
 def walk(obj, where):

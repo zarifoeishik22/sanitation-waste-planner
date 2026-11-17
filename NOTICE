@@ -2,13 +2,17 @@ sanitation-waste-planner
 
 Third-party material in this repository
 
-  Hind Siliguri typeface (vendor/fonts/)
-    Copyright (c) 2015 Indian Type Foundry. SIL Open Font License 1.1 (vendor/fonts/OFL.txt).
-    Files from the @fontsource/hind-siliguri package, version 5.3.0.
+  Libraries bundled into assets/ by the build (see package.json for versions)
+    React (MIT), MapLibre GL JS (BSD 3-Clause), Recharts (MIT), pdf.js / pdfjs-dist (Apache 2.0),
+    Anek Bangla typeface via @fontsource-variable/anek-bangla (SIL Open Font License 1.1).
 
-  pdf.js (vendor/pdfjs/)
-    Copyright Mozilla Foundation and contributors. Apache License 2.0 (vendor/pdfjs/LICENSE).
-    Unmodified legacy build files from the pdfjs-dist package, version 6.5.438.
+  Town positions (data/places.json)
+    Sub-district centres derived from bangladesh-geojson (github.com/ifahimreza/bangladesh-geojson),
+    which is built from OpenStreetMap data, (c) OpenStreetMap contributors, Open Database Licence (ODbL).
+    Eight town positions from GeoNames (CC BY 4.0).
+
+  Map tiles and place search, loaded at run time and not redistributed here
+    (c) OpenStreetMap contributors, ODbL. Tiles from tile.openstreetmap.org; place search by Nominatim.
 
   Test fixture text (tests/fixtures/)
     Pages of the SFD Lite Report for Kaliakair Municipality, CWIS-FSM Support Cell, DPHE, 2023 (SFD portal),

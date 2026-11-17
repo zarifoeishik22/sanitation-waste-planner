@@ -1,0 +1,2 @@
+async function g(o){const r=[];for(let e=1;e<=o.numPages;e+=1){const a=await(await o.getPage(e)).getTextContent(),n=new Map;for(const t of a.items){if(!t.str||!t.str.trim())continue;const s=Math.round(t.transform[5]/3)*3;n.has(s)||n.set(s,[]),n.get(s).push({x:t.transform[4],s:t.str})}const i=[...n.entries()].sort((t,s)=>s[0]-t[0]).map(([,t])=>t.sort((s,c)=>s.x-c.x).map(s=>s.s.trim()).join(" ").replace(/\s+/g," ").trim());r.push(i.join(`
+`))}return r}export{g as pdfToPages};

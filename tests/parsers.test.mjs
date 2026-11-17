@@ -73,9 +73,9 @@ test('a file that is neither report is recognised as such', () => {
 // The PDFs themselves, when available on this machine (the WFD portal PDF is never committed).
 for (const [name, env, parse, check] of [['SFD', 'SFD_PDF', parseSfdReport, checkSfd], ['WFD', 'WFD_PDF', parseWfdPortal, checkWfd]]) {
   const path = process.env[env];
-  test(`${name} PDF read with the vendored pdf.js`, { skip: path && existsSync(path) ? false : `${env} not set` }, async () => {
-    const pdfjs = await import('../vendor/pdfjs/pdf.min.mjs');
-    pdfjs.GlobalWorkerOptions.workerSrc = join(root, 'vendor', 'pdfjs', 'pdf.worker.min.mjs');
+  test(`${name} PDF read with pdf.js`, { skip: path && existsSync(path) ? false : `${env} not set` }, async () => {
+    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    pdfjs.GlobalWorkerOptions.workerSrc = join(root, 'node_modules', 'pdfjs-dist', 'legacy', 'build', 'pdf.worker.mjs');
     const doc = await pdfjs.getDocument({ data: new Uint8Array(readFileSync(path)), isEvalSupported: false, verbosity: 0 }).promise;
     check(parse(await pdfToPages(doc)));
   });
